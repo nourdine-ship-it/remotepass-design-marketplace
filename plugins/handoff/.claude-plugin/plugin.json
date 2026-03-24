@@ -1,0 +1,8 @@
+{
+  "name": "handoff",
+  "version": "1.0.0",
+  "description": "Consistent developer handoff specs — same sections, same style as EOR contract editing reference every time",
+  "author": { "name": "Nourdine", "email": "nourdine@remotepass.com" },
+  "repository": "https://github.com/nourdine-ship-it/remotepass-design-marketplace",
+  "keywords": ["handoff", "specs", "dev", "figma", "notion"]
+}

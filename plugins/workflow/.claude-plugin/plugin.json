@@ -1,0 +1,8 @@
+{
+  "name": "workflow",
+  "version": "1.0.0",
+  "description": "Design workflow tools — briefs from Jira tickets and design decision documentation",
+  "author": { "name": "Nourdine", "email": "nourdine@remotepass.com" },
+  "repository": "https://github.com/nourdine-ship-it/remotepass-design-marketplace",
+  "keywords": ["workflow", "design-brief", "decision", "jira", "notion", "documentation"]
+}

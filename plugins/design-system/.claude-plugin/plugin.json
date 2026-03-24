@@ -1,0 +1,8 @@
+{
+  "name": "design-system",
+  "version": "1.0.0",
+  "description": "Component documentation and peer review for the RemotePass design system",
+  "author": { "name": "Nourdine", "email": "nourdine@remotepass.com" },
+  "repository": "https://github.com/nourdine-ship-it/remotepass-design-marketplace",
+  "keywords": ["design-system", "components", "documentation", "tokens", "figma"]
+}

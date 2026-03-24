@@ -1,0 +1,24 @@
+{
+  "hooks": {
+    "PermissionRequest": [
+      {
+        "matcher": "mcp__figma-mcp-server__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/handoff-hooks.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__claude_ai_Notion__notion-fetch|mcp__claude_ai_Notion__notion-search",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/handoff-hooks.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
