@@ -1,8 +1,0 @@
-{
-  "name": "research",
-  "version": "1.0.0",
-  "description": "Research synthesis and competitive analysis tools for the RemotePass design team",
-  "author": { "name": "Nourdine", "email": "nourdine@remotepass.com" },
-  "repository": "https://github.com/nourdine-ship-it/remotepass-design-marketplace",
-  "keywords": ["research", "synthesis", "competitive", "insights", "themes"]
-}

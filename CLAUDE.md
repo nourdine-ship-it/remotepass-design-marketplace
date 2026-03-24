@@ -36,6 +36,33 @@ B2B HR and payroll platform for remote teams.
 
 ---
 
+## Marketplace file structure
+
+```
+remotepass-design-marketplace/
+├── .claude-plugin/
+│   └── marketplace.json          # Marketplace metadata & plugin registry
+├── plugins/
+│   ├── SKILL_TEMPLATE.md         # Template for creating new skills
+│   └── [plugin-name]/            # One folder per plugin (critique, design-system, qa)
+│       ├── .claude-plugin/
+│       │   └── plugin.json       # Plugin metadata, name, version
+│       ├── hooks/
+│       │   ├── hooks.json        # Hook definitions (when hooks fire)
+│       │   └── [name]-hooks.sh   # Hook logic
+│       └── skills/
+│           └── [skill-name]/
+│               └── SKILL.md      # The skill prompt & instructions
+├── docs/
+│   └── setup.md                  # Full setup instructions
+├── CLAUDE.md                     # Shared team context, auto-loaded by Claude
+├── CONTRIBUTING.md               # How to add a skill or plugin
+├── install.sh                    # Install helper script
+└── README.md
+```
+
+---
+
 ## File & naming conventions
 
 - Figma files: `[Project key] — [Feature]` e.g. "EOR — Compensation & Benefits"

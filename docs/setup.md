@@ -4,118 +4,81 @@ Everything you need to install once. After this, day-to-day use requires no setu
 
 ---
 
-## 1. Clone the repo and install skills
+## 1. Install plugins
 
-```bash
-git clone git@github.com:nourdine-ship-it/remotepass-design-marketplace.git
-bash remotepass-design-marketplace/install.sh
+Open Claude Code and run:
+
+```
+/plugin marketplace add https://github.com/nourdine-ship-it/remotepass-design-marketplace.git
 ```
 
-This links all skills to Claude Code so `/ux-copy`, `/design-review`, etc. become available immediately.
+Then install each plugin:
+
+```
+/plugin install critique@remotepass-design-marketplace
+/plugin install design-system@remotepass-design-marketplace
+/plugin install qa@remotepass-design-marketplace
+```
+
+Type `/` to confirm all skills are available.
 
 ---
 
-## 2. MCP servers (required for some skills)
+## 2. Figma access token (required for most skills)
 
-MCP servers are integrations that let Claude read/write to tools like Figma, Notion, and Jira. They're configured once in Claude Code settings.
+Most skills read Figma data via the REST API. They need a personal Figma access token set as an environment variable.
 
-Skills that need MCPs will tell you at runtime if something is missing.
+**Get your token:**
+Figma → Profile → Settings → Personal Access Tokens → Generate new token. Grant `files:read` scope only.
 
-### Which skills need which MCP
+**Set the environment variable:**
+```bash
+# Add to your ~/.zshrc or ~/.bash_profile
+export FIGMA_ACCESS_TOKEN="your-token-here"
+```
+
+Then restart your terminal (or run `source ~/.zshrc`).
+
+---
+
+## 3. MCP servers (required for some skills)
+
+MCP servers let Claude read/write to Notion and Jira. They're configured once in Claude Code settings.
+
+Ask Nourdine for the MCP config block — it's a few lines that go into `~/.claude/settings.json`. He'll send it over Slack. Do not share MCP tokens publicly. Each person uses their own.
+
+### Which skills need what
 
 | Skill | Requires |
 |---|---|
-| `/design-review`, `/ux-copy`, `/microcopy`, `/component-spec`, `/component-documentation`, `/peer-review` | Nothing extra — works out of the box |
-| `/handoff`, `/document-component`, `/peer-review-component`, `/sync-ds-change` | Figma bridge + Notion MCP + Jira MCP |
-| `/task`, `/daily-brief` | Notion MCP + Jira MCP |
-| `/connect-figma` | Figma bridge |
-
-### How to configure MCPs
-
-Ask Nourdine for the MCP config block — it's a few lines that go into your Claude Code settings file (`~/.claude/settings.json`). He'll send it over Slack.
-
-Do not share MCP tokens publicly. Each person uses their own.
+| `/ux-audit`, `/copy-audit` | Nothing extra — works out of the box |
+| `/design-review`, `/a11y-check` | `FIGMA_ACCESS_TOKEN` |
+| `/design-qa`, `/component-documentation`, `/peer-review` | `FIGMA_ACCESS_TOKEN` + Notion MCP |
 
 ---
 
-## 3. Figma bridge (required for Figma skills)
-
-The Figma bridge is a local server that lets Claude read your Figma files directly.
-
-**Install:**
-```bash
-git clone https://github.com/[org]/figma-mcp-server.git ~/figma-mcp-server
-cd ~/figma-mcp-server
-npm install && npm run build
-```
-
-**Configure your Figma token:**
-```bash
-cp .env.example .env
-# Open .env and paste your Figma Personal Access Token
-```
-
-Get your Figma PAT: Figma → Profile → Settings → Personal Access Tokens → Generate.
-
-**Start the bridge:**
-The bridge starts automatically when you run `/connect-figma` in Claude. You don't need to start it manually.
-
----
-
-## 4. Personal config file (required for workflow skills)
-
-Some skills need your personal IDs (Notion user ID, Jira account ID) to assign tasks and log work correctly.
-
-Create this file:
-
-```
-~/.claude/design-team-config.md
-```
-
-With this content (fill in your own values):
-
-```markdown
-# My Design Team Config
-
-## Notion
-- My user ID: [get from Nourdine]
-- Workload database: a586a2bd-cfb5-4104-8e42-6e348c9ce673
-
-## Jira
-- My account ID: [get from Nourdine]
-- Cloud ID: 425566cf-c493-463f-b66e-0b019c72b5b9
-
-## Timezone
-- America/Toronto (Eastern Time)
-```
-
-This file lives only on your machine — never commit it to the repo.
-
----
-
-## 5. Getting updates
+## 4. Getting updates
 
 When a skill is updated or a new one is added:
 
 ```bash
-cd ~/remotepass-design-marketplace
-git pull
+cd ~/remotepass-design-marketplace && git pull
 ```
 
-If a new skill was added, run `bash install.sh` once more to link it.
+Plugin updates are picked up automatically — no reinstall needed. If a new plugin was added, install it with `/plugin install [name]@remotepass-design-marketplace`.
 
 ---
 
 ## Troubleshooting
 
 **A skill isn't showing up in Claude**
-→ Make sure you ran `install.sh`. Check `~/.claude/skills/` — the skill file should be there as a symlink.
+→ Make sure you ran all three `/plugin install` commands. Type `/` to see available skills.
 
 **Figma tools aren't working**
-→ Run `/connect-figma` first. If that fails, check that your `.env` file has a valid Figma token.
+→ Check that `FIGMA_ACCESS_TOKEN` is set (`echo $FIGMA_ACCESS_TOKEN`). If empty, add it to your shell profile and restart.
 
 **Notion/Jira tools aren't working**
 → Your MCP config may be missing or your token expired. Ping Nourdine.
 
 **Something broke after `git pull`**
-→ Check the repo's changelog or ping Nourdine. Nothing in a `git pull` can break your local Claude setup permanently — the worst case is a skill file has a typo.
+→ Check the repo changelog or ping Nourdine.
