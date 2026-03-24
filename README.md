@@ -46,13 +46,13 @@ Still inside Claude Code, install each plugin:
 /plugin install workflow@remotepass-design-marketplace
 ```
 
-That's it — all 15 skills are now available. Type `/` to see them.
+That's it — all 8 skills are now available. Type `/` to see them.
 
 ---
 
 ## Getting updates
 
-When Nourdine updates a skill or adds a new one, he'll let you know in Slack.
+When you update a skill or add a new one, inform the team in Slack.
 
 To update, open Terminal and run:
 
