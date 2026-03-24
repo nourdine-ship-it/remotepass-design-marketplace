@@ -1,95 +1,194 @@
 ---
 title: Component Documentation
-description: Write complete design system documentation — anatomy, variants, usage guidelines, content rules, and accessibility
-version: 1.0.0
-requires: none
-allowed-tools: WebFetch
-argument-hint: "[component name]"
+description: Full workflow — inspect a Figma component via REST API, cross-check shadcn, confirm findings, then write structured documentation to a Notion page
+version: 1.1.0
+requires: |
+  - Figma component URL (required) — the component set to document
+  - Notion page URL (required) — an empty page the user has already created for this component
+  - FIGMA_ACCESS_TOKEN environment variable — for REST API access
+  - Notion MCP connected — for writing to the Notion page
+allowed-tools: WebFetch, Read, Bash
+argument-hint: "[figma-url] [notion-url]"
 ---
 
 ## Summary
 
-Writes complete, consistently structured documentation for a RemotePass design system component. Covers every section the team has standardised on — anatomy, variants, usage guidelines, content rules, accessibility, and related components — so the design system docs feel coherent regardless of who wrote any individual entry.
+Full documentation workflow for a RemotePass design system component. Inspects the component via the Figma REST API, cross-checks against shadcn and Radix UI, presents findings for confirmation, then writes structured documentation to the provided Notion page in the exact format the DS uses.
 
 ## Why this is useful
 
-Inconsistent documentation is a design system smell. When docs are written by different people at different times without a shared structure, the DS becomes hard to trust. This skill enforces the standard format every time.
+Documentation written without inspecting the actual Figma data drifts from reality. This skill reads the component directly, presents what it finds for designer confirmation, then writes to Notion — so docs match what was actually built.
 
 ## Key features
 
-- Fixed section structure — same format for every component, always
-- Anatomy section forces completeness — naming every part surfaces things that haven't been agreed on
-- "When not to use" is mandatory — the most skipped and most valuable section
-- Purpose over description — "why it exists" not just "what it looks like"
+- Figma REST API inspection — no bridge CLI required
+- shadcn + Radix cross-check for structural deviations
+- Findings confirmation before writing — designer can correct anything
+- Figma improvement suggestions (naming, tokens, missing states)
+- Writes the exact Notion page structure the DS uses (based on Radio Group reference)
+- Sets Figma URL as a database property, not inline in content
+- Custom component support — purple callout + omits Deviations section
 
 ## Triggers
 
 - "Document the Checkbox component for the design system"
 - "Write DS docs for the new Tag component"
-- "I need to add the DatePicker to Notion — write the documentation"
-- "Component docs for the Status Badge"
+- "I need to add the DatePicker to Notion — document it"
 - "Document this component following our standard format"
 
 ## Prerequisites
 
-None. Works best with a Figma link or screenshot showing all variants.
+- **Figma component URL** (required) — the component set to document
+- **Notion page URL** (required) — an empty page you've already created for this component (place it next to Button, Radio Group, Checkbox in the Components section)
+- **Figma REST API token** — set as `FIGMA_ACCESS_TOKEN` in the environment. Must be a **read-only token**: grant only `files:read` and `variables:read` scopes. Do not grant write, delete, or update permissions.
+- **Notion MCP connected** — used to write the documentation page
 
 ## Behavior & Instruction
 
-1. If the user hasn't provided enough context, ask for:
-   - **Component name:** as it appears in the design system
-   - **Purpose:** what it is and what problem it solves (1–2 sentences)
-   - **All variants:** visual or described — every variant that exists
-   - **Usage context:** where in the product is it used? In what flows?
-   - **Do/Don't examples:** (optional) existing examples of right and wrong usage
-   - **Related components:** (optional) what does it relate to, compose with, or replace?
-   - **Accessibility notes:** (optional) known requirements or patterns
-   - **Figma link:** (optional) use WebFetch to extract any available context
+1. **Collect inputs and verify connections**
 
-2. Write documentation with the following sections in this exact order:
+   Check what was provided in the arguments:
+   - **Figma component URL** — the component set to document
+   - **Notion page URL** — the empty page to write to
 
-   **Overview**
-   2–3 sentences: what it is, what it does, and why it exists in the design system — not just what it looks like. Distinguish purpose from description.
+   If either is missing, ask before proceeding.
 
-   **Anatomy**
-   Label and describe each part of the component (container, label, icon, indicator, etc.). Numbered or bulleted list.
+   Then verify:
+   - Confirm `FIGMA_ACCESS_TOKEN` is available in the environment. If not, ask the user to set it — remind them it must be a read-only token (`files:read` + `variables:read` scopes only, no write or delete permissions).
+   - Confirm Notion MCP is connected by making a lightweight call (`mcp__claude_ai_Notion__notion-fetch` with the page ID). If it fails, tell the user: "Notion MCP is not connected — please check your MCP configuration before running this skill."
 
-   **Variants**
-   For each variant:
-   - Name (as it appears in Figma)
-   - When to use it
-   - Visual distinguisher (what makes it look different)
+   Do not proceed until both URLs are provided and both connections are confirmed.
 
-   **Usage guidelines**
+2. **Extract IDs**
+   - From the Figma URL: extract the file key and node ID (convert dashes to colons, e.g. `4605-4156` → `4605:4156`)
+   - From the Notion URL: extract the page ID
 
-   *When to use:*
-   3–5 specific scenarios where this is the right component.
+3. **Inspect the component via Figma REST API**
+   ```
+   curl "https://api.figma.com/v1/files/{file_key}/nodes?ids={node_id}&depth=3" \
+     -H "X-Figma-Token: $FIGMA_ACCESS_TOKEN"
+   ```
 
-   *When not to use:*
-   3–5 specific scenarios with a suggestion for what to use instead.
+   Use `depth=3` — enough to extract ComponentSet → Component → first-level children. Only go deeper if the tree is unusually nested.
 
-   **Content guidelines**
-   - Recommended character limits for text elements
-   - Tone and language notes
-   - What to do when content is too long
+   Extract:
+   - Component name and type (COMPONENT_SET, FRAME, or other)
+   - If the node is a **FRAME**, look inside for COMPONENT_SET children — do not treat the frame itself as the component
+   - All variant properties and their values (from `componentPropertyDefinitions`)
+   - All slot properties (INSTANCE_SWAP), boolean properties, text properties
+   - Token bindings (`boundVariables`) per layer
 
-   **Accessibility**
-   - Keyboard interaction
-   - Screen reader expectations
-   - Relevant ARIA patterns
+   **Token audit accuracy rules:**
+   - `boundVariables` with an empty string value (`""`) means the variable ID wasn't captured — not a hardcoded value. Cross-check the actual pixel value.
+   - `cornerRadius: 0` and `rectangleCornerRadii: [0,0,0,0]` with no binding are not violations — zero is the default.
+   - Only flag non-zero fills, spacings, or radii with no variable binding.
+   - **External library tokens** have a long hash prefix before `/` (e.g. `VariableID:2348e5af.../1699:241`). **Local tokens** are short numeric (e.g. `VariableID:132:42`). Flag external tokens separately.
 
-   **Related components**
-   List related components with a one-line note on when you'd choose one over the other.
+4. **Cross-check with shadcn and Radix UI** (WebFetch)
+   - `https://ui.shadcn.com/docs/components/{component-name}`
+   - `https://www.radix-ui.com/primitives/docs/components/{component-name}` (if a primitive exists)
 
-3. Keep the tone professional but not dry — precise without being overly technical. This documentation is read by designers and developers alike.
+   Compare:
+   - Are all shadcn states/variants present in Figma?
+   - Does the component structure match the shadcn sub-component model?
+   - **List every structural deviation** — added/renamed/removed sub-components, properties, variants, or states. Do NOT list visual/styling differences (border radius, padding, spacing, colors, token choices) — those are not deviations.
+   - Note any Figma states that are RemotePass additions (custom, no shadcn equivalent).
+
+5. **Present findings and wait for confirmation**
+
+   Present:
+   1. Component name + variants/properties table (what's in Figma)
+   2. shadcn alignment — what matches, what's missing, what's custom
+   3. Token audit — external library tokens or hardcoded non-zero values
+   4. Structural deviations from shadcn (structural only)
+   5. Questions if anything is unclear
+
+   Wait for the designer to confirm or resolve issues before proceeding.
+
+6. **Present Figma improvement suggestions** (separate from findings)
+
+   Review for:
+   - **Token hygiene** — hardcoded values or missing token bindings
+   - **Naming** — property names that don't follow DS conventions (PascalCase, `Show X` booleans, `Default/Hover/Focus/Disabled` states)
+   - **Missing states** — states present in shadcn but absent in Figma
+   - **Structural gaps** — sub-components or composition patterns from shadcn that are missing
+   - **Redundant variants** — overlapping or simplifiable variants
+
+   Format as a numbered list with bold category labels. Note priority per item.
+
+   Wait for the designer to acknowledge before proceeding to Notion.
+
+7. **Write the Notion page**
+
+   First, fetch the Radio Group reference page (`314c5c4e-3150-801a-a782-d29fe8cf30cb`) using `mcp__claude_ai_Notion__notion-fetch` to sample its exact block format. This prevents guessing Notion syntax (e.g. tables are `<table header-row="true">`, not markdown pipes).
+
+   **Determine component type before writing:**
+   - **shadcn component** → standard structure, include `## Deviations from shadcn`
+   - **Custom component** (no shadcn equivalent) → add purple callout at the very top (before `## Description`), and **omit** `## Deviations from shadcn` entirely
+
+   Purple callout for custom components:
+   ```
+   ::: callout {color="purple_bg"}
+   **Custom Component** — Not part of shadcn/ui. No Radix UI primitive. Built exclusively for RemotePass.
+   :::
+   ```
+
+   Write the page using `mcp__claude_ai_Notion__notion-update-page` with `replace_content`.
+
+   **Page structure (in this exact order):**
+
+   1. `## Description` — 1–2 sentences describing the component. No inline Figma link.
+   2. `## Changelog` — table: Date / Designer / Change. Today's date, designer = Nourdine, change = "Initial documentation — [summary of variants and states]. Shadcn/ui alignment." For custom components: "Custom component, no shadcn alignment."
+   3. `---`
+   4. `## References` — shadcn/ui source link + Radix UI primitive link. If no Radix primitive: "No underlying Radix primitive — shadcn [Component] is a pure styled component (HTML only)." For custom: "No shadcn/ui component — [Component] is a custom RemotePass component with no shadcn or Radix UI counterpart."
+   5. `---`
+   6. `## Deviations from shadcn` — **shadcn components only; omit entirely for custom components.** Structural deviations only (added sub-components, renamed/added/removed properties, extra or missing variants/states). Do NOT include visual/styling differences. If no structural deviations: single green callout: `<callout color="green_bg">**Perfect shadcn match** — No deviations. All variants and states map directly to shadcn behaviour.</callout>`. If deviations exist: one yellow callout per deviation: `<callout color="yellow_bg">**Category** — explanation + implementation note.</callout>`. Then `---`.
+   7. `## Variants & Properties` — one `###` sub-section per sub-component, 3-column table (Property / Values / Notes)
+   8. `---`
+   9. `## RemotePass Use Cases` — just the text "Add examples here"
+   10. `---`
+   11. `## Do's & Don'ts` — two-column layout. All green (do) callouts in the left column. All red (don't) callouts in the right column. Never interleave:
+       ```
+       <columns>
+         <column>
+           ::: callout {icon="/icons/checkmark_green.svg" color="green_bg"}
+             Do text here
+           :::
+         </column>
+         <column>
+           ::: callout {icon="/icons/clear_red.svg" color="red_bg"}
+             Don't text here
+           :::
+         </column>
+       </columns>
+       ```
+
+   **After writing page content**, also set the Figma URL as a database property using `mcp__claude_ai_Notion__notion-update-page` with `update_properties`:
+   ```json
+   { "Figma": "https://www.figma.com/design/..." }
+   ```
+   Do not include the Figma link inline in the page content.
 
 ## Examples
 
-- "Write documentation for the Button component"
-- "DS docs for the new Combobox — here's a Figma link with all variants"
-- "Document the Alert/Banner component we just finalized"
+- "Document the Badge component — here's the Figma link and the empty Notion page"
+- "Write DS docs for the Combobox: [figma-url] [notion-url]"
+- "Document this component following the standard format"
 
 ## Security & Safety
 
-- Read-only skill — WebFetch only for public Figma links.
-- No writes, no confirmation needed.
+- Figma REST API read — non-destructive.
+- Notion read (reference page) — non-destructive.
+- Notion write (populate the user-provided page) — expected write, no additional confirmation needed.
+- No changes to existing Notion pages without explicit confirmation.
+
+## Key references
+
+- Figma DS file key: `68BjBAp23kbcFrNQ9bK6jP`
+- Figma API token: `$FIGMA_ACCESS_TOKEN`
+- Radio Group reference page (Notion): `314c5c4e-3150-801a-a782-d29fe8cf30cb`
+- Designer name for changelog: Nourdine
+- External token IDs: long hash prefix before `/` (e.g. `VariableID:2348e5af.../1699:241`)
+- Local token IDs: short numeric (e.g. `VariableID:132:42`)
+- `cornerRadius: 0` with no binding = not a violation
+- `rectangleCornerRadii: [0,0,0,0]` with no binding = not a violation

@@ -1,22 +1,25 @@
 ---
 title: Design Review
-description: Structured design critique across 5 dimensions — clarity, hierarchy, friction, consistency, edge cases — with one concrete fix per issue
-version: 1.0.0
-requires: none
-allowed-tools: WebFetch
-argument-hint: "[Figma link or describe the screen/flow]"
+description: Structured design critique across 5 dimensions — clarity, hierarchy, friction, consistency, edge cases — inspects the Figma frame via REST API for accurate layer data
+version: 1.1.0
+requires: |
+  - Figma frame URL (required) — the screen or flow to review
+  - FIGMA_ACCESS_TOKEN environment variable — for REST API access
+allowed-tools: WebFetch, Read, Bash
+argument-hint: "[figma-url]"
 ---
 
 ## Summary
 
-Gives a structured, honest critique of a design across five UX dimensions. Produces specific, anchored observations and one concrete fix per issue — the kind of feedback a thoughtful senior designer would give, not "looks good" or vague impressions.
+Gives a structured, honest critique of a design across five UX dimensions. Inspects the Figma frame via the REST API to extract actual layer structure, text content, and component names — then produces specific, anchored observations with one concrete fix per issue.
 
 ## Why this is useful
 
-Async design critique without a shared framework produces inconsistent, often useless feedback. This skill gives Claude a consistent backbone so every review covers the same ground, at the right depth, with actionable output.
+Async design critique without a shared framework produces inconsistent, often useless feedback. Inspecting the actual Figma layer tree means findings are grounded in what's really there — not a visual impression of a screenshot.
 
 ## Key features
 
+- Figma REST API inspection — extracts layer structure, text layers, component names, and nesting
 - Five fixed dimensions — ensures coverage, prevents random jumping
 - One concrete change per issue — forces actionable specificity
 - Design stage awareness — early explorations get direction feedback, handoff-ready designs get detail feedback
@@ -32,42 +35,62 @@ Async design critique without a shared framework produces inconsistent, often us
 
 ## Prerequisites
 
-None. Works best with a screenshot or Figma link, but can work from a detailed description.
+- **Figma frame URL** (required) — the specific frame, screen, or flow to review
+- **Figma REST API token** — set as `FIGMA_ACCESS_TOKEN` in the environment. Must be a **read-only token**: grant only `files:read` scope. Do not grant write, delete, or update permissions.
 
 ## Behavior & Instruction
 
-1. If the user hasn't provided full context, ask for:
-   - **The design:** screenshot, Figma link, or detailed description. The more visual the better.
+1. **Collect inputs and verify access**
+
+   Check what was provided in the arguments. If the Figma URL is missing, ask for it.
+
+   Confirm `FIGMA_ACCESS_TOKEN` is available in the environment. If not, ask the user to set it — remind them it must be a read-only token (`files:read` scope only, no write or delete permissions).
+
+   Also ask for any context that's missing (skip if already provided):
    - **User goal:** what is the user trying to accomplish?
-   - **Business goal:** what does this design need to achieve for the product?
+   - **Business goal:** what does this design need to achieve?
    - **Design stage:** Early exploration / Mid-fidelity / Ready for dev handoff
-   - **Constraints:** (optional) technical, time, accessibility, or brand constraints that shaped it
-   - **Focus area:** (optional) what are you most uncertain about? If none, review broadly.
+   - **Focus area:** (optional) what are you most uncertain about?
 
-2. If a Figma link is provided, use WebFetch to retrieve any public preview context available.
+2. **Extract IDs from the Figma URL**
+   - Extract the file key from the URL path
+   - Extract `node-id`, convert dashes to colons (e.g. `4605-4156` → `4605:4156`)
 
-3. Review the design across **5 dimensions**. For each:
+3. **Inspect the frame via Figma REST API**
+   ```
+   curl "https://api.figma.com/v1/files/{file_key}/nodes?ids={node_id}&depth=4" \
+     -H "X-Figma-Token: $FIGMA_ACCESS_TOKEN"
+   ```
+
+   From the response, extract:
+   - Frame name and type
+   - All text layers and their content (for copy and hierarchy review)
+   - All component instances and which DS components are used
+   - Layer nesting depth and structure (for hierarchy review)
+   - Any visible states or variants in use
+   - Frame dimensions and basic layout structure
+
+4. **Review the design across 5 dimensions.** For each:
    - Give a 1-sentence verdict: **Strong** / **Needs work** / **Unclear without more context**
-   - List specific observations (not general impressions) — quote or reference the exact element
+   - List specific observations — reference the exact layer name, text string, or component
    - Suggest one concrete change per issue identified
 
    The 5 dimensions:
-   - **Clarity** — Is it immediately obvious what to do and why?
-   - **Hierarchy** — Does the visual structure guide attention in the right order?
-   - **Friction** — Where might a user hesitate, get confused, or drop off?
-   - **Consistency** — Does this feel consistent with patterns the user already knows?
-   - **Edge cases** — What states or scenarios does this design not handle that it should?
+   - **Clarity** — Is it immediately obvious what to do and why? Are labels and CTAs unambiguous?
+   - **Hierarchy** — Does the structure guide attention in the right order? Are primary and secondary actions visually distinct?
+   - **Friction** — Where might a user hesitate, get confused, or drop off? Are there unnecessary steps or unclear inputs?
+   - **Consistency** — Does this use components and patterns the user already knows? Any deviations from DS components?
+   - **Edge cases** — What states does this not handle? (empty, loading, error, long text, mobile)
 
-4. End with: **Priority fix** — the single thing to address before this moves to the next stage, and why.
+5. **End with: Priority fix** — the single most important thing to address before this moves to the next stage, and why.
 
 ## Examples
 
-- "Review the EOR onboarding flow — it's mid-fi and I'm going to share it with the PM tomorrow"
+- "Review the EOR onboarding flow — it's mid-fi and I'm sharing it with the PM tomorrow"
 - "This is the empty state for the Payroll tab. Does the hierarchy work?"
-- "I'm not sure this error state is clear enough — give me a full review"
 - "Quick critique of this modal before I hand off to engineering"
 
 ## Security & Safety
 
-- Read-only skill — WebFetch only for public Figma links.
-- No writes, no confirmation needed.
+- Figma REST API read — non-destructive.
+- No writes anywhere, no confirmation needed.

@@ -1,5 +1,12 @@
 ---
 title: Copy Audit
+status: placeholder
+---
+
+> **Placeholder** — This skill is not yet active. It will be set up once the RemotePass copy standards are documented.
+
+---
+title: Copy Audit
 description: Check all UI text in a frame against RemotePass copy standards — flags tone, format, placeholder, and error copy issues
 version: 1.0.0
 requires: none

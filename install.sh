@@ -1,5 +1,5 @@
 #!/bin/bash
-# RP Design Skills — install script
+# RemotePass Design Marketplace — install script
 # Run once per machine: bash install.sh
 
 set -euo pipefail
@@ -8,8 +8,8 @@ SKILLS_DIR="$HOME/.claude/skills"
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo ""
-echo "RP Design Skills — Setup"
-echo "========================"
+echo "RemotePass Design Marketplace — Setup"
+echo "======================================"
 echo ""
 
 # Create the skills directory if it doesn't exist

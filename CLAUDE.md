@@ -55,6 +55,19 @@ B2B HR and payroll platform for remote teams.
 
 ---
 
+## Versioning
+
+Any change to a plugin, skill, hook, or marketplace file must be followed by a version bump:
+- **Patch** (`1.0.0` → `1.0.1`): fixes, copy edits, minor tweaks
+- **Minor** (`1.0.0` → `1.1.0`): new skill or hook, expanded capability
+- **Major** (`1.0.0` → `2.0.0`): breaking change, restructure, new plugin
+
+**What to update on every change:**
+1. The relevant `plugins/*/. claude-plugin/plugin.json` — bump the plugin's own version
+2. `.claude-plugin/marketplace.json` — bump both the plugin entry and `metadata.version`
+
+---
+
 ## Hard rules
 
 - Timezone: always Eastern Time (America/Toronto)

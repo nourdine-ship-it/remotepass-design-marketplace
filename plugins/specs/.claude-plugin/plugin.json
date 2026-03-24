@@ -1,8 +1,0 @@
-{
-  "name": "specs",
-  "version": "1.0.0",
-  "description": "Engineering-ready component specs for developer handoff",
-  "author": { "name": "Nourdine", "email": "nourdine@remotepass.com" },
-  "repository": "https://github.com/nourdine-ship-it/remotepass-design-marketplace",
-  "keywords": ["specs", "handoff", "components", "engineering", "props"]
-}

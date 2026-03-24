@@ -1,8 +1,0 @@
-{
-  "name": "copy",
-  "version": "1.0.0",
-  "description": "UX copy and microcopy generation aligned to RemotePass voice and tone",
-  "author": { "name": "Nourdine", "email": "nourdine@remotepass.com" },
-  "repository": "https://github.com/nourdine-ship-it/remotepass-design-marketplace",
-  "keywords": ["copy", "ux-writing", "microcopy", "voice", "tone"]
-}

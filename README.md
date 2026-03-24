@@ -8,14 +8,10 @@ Claude Code plugins for the RemotePass design team. Install once — all 15 skil
 
 | Plugin | Skills |
 |---|---|
-| Copy | `/ux-copy` · `/microcopy` |
 | Critique | `/design-review` |
-| Specs | `/component-spec` |
 | Design System | `/component-documentation` · `/peer-review` |
 | QA | `/design-qa` · `/copy-audit` · `/a11y-check` · `/ux-audit` |
-| Handoff | `/handoff` |
-| Research | `/research-synthesis` · `/competitive-research` |
-| Workflow | `/design-brief` · `/design-decision` |
+
 
 Type `/` in Claude Code to see all available skills and trigger them with natural language.
 

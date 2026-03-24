@@ -1,28 +1,29 @@
 ---
 title: Design QA
-description: DS compliance check — tokens, components, layout, naming, and states against RP guidelines, shadcn, and Notion docs
-version: 1.0.0
-requires: figma-bridge
-allowed-tools: WebFetch, mcp__figma-mcp-server__get_file_structure, mcp__figma-mcp-server__search_nodes, mcp__figma-mcp-server__get_components, mcp__figma-mcp-server__get_styles, mcp__claude_ai_Notion__notion-fetch, mcp__claude_ai_Notion__notion-search
-argument-hint: "[Figma link to frame, section, or page]"
+description: DS compliance check — tokens, components, layout, naming, and states against RP guidelines, shadcn, and Notion docs, inspected via the Figma REST API
+version: 1.1.0
+requires: |
+  - Figma frame URL (required) — the frame, section, or page to inspect
+  - FIGMA_ACCESS_TOKEN environment variable — for REST API access
+  - Notion MCP connected — for fetching DS component documentation
+allowed-tools: WebFetch, Read, Bash
+argument-hint: "[figma-url]"
 ---
 
 ## Summary
 
-Inspects a Figma frame, section, or page for design system compliance. Checks for hardcoded values, incorrect component usage, layout issues, naming convention violations, and missing states. Cross-references Notion DS guidelines, shadcn patterns, and known RP design patterns. For new redesign work only — not for existing screens built with old components.
+Inspects a Figma frame, section, or page for design system compliance. Checks for hardcoded values, incorrect component usage, layout issues, naming convention violations, and missing states. Cross-references Notion DS component docs and shadcn patterns. Uses the Figma REST API — no bridge CLI required.
 
 ## Why this is useful
 
-During a platform redesign, DS compliance drift is the biggest risk. Without an automated check, hardcoded values and non-DS components slip through to engineering and cause rework. This skill catches those issues before handoff, using actual Figma data — not just visual inspection.
+During a platform redesign, DS compliance drift is the biggest risk. Without an automated check, hardcoded values and non-DS components slip through to engineering and cause rework. This skill catches those issues before handoff using actual Figma data.
 
 ## Key features
 
-- Inspects actual token values via Figma CLI bridge (not just visual inspection)
-- Cross-references Notion DS component docs for the correct usage rules
-- Fetches latest shadcn docs online for pattern comparison
-- Checks against known RP design patterns from `context/rp-patterns.md`
+- Figma REST API inspection — reads actual token values, component names, and layer structure
+- Cross-references Notion DS docs for correct component usage rules
+- Fetches latest shadcn docs for pattern comparison
 - Issues grouped by severity: Critical / Warning / Note
-- Always prompts to add new patterns discovered to the RP patterns reference
 
 ## Triggers
 
@@ -34,67 +35,79 @@ During a platform redesign, DS compliance drift is the biggest risk. Without an 
 
 ## Prerequisites
 
-**The Figma CLI bridge is MANDATORY for this skill.** It is needed to inspect actual token values, computed styles, and component properties. The Figma MCP alone cannot read these values.
-
-Before proceeding, verify the bridge is running:
-- Try calling a Figma bridge tool (e.g. `get_file_structure`)
-- If it fails or is unavailable, stop immediately and tell the user: "This skill requires the Figma CLI bridge. Run `/connect-figma` first, then try again."
-
-Do not proceed without the bridge — the output will be inaccurate.
+- **Figma frame URL** (required) — the specific frame, section, or page to inspect
+- **Figma REST API token** — set as `FIGMA_ACCESS_TOKEN` in the environment. Must be a **read-only token**: grant only `files:read` and `variables:read` scopes. Do not grant write, delete, or update permissions.
+- **Notion MCP connected** — used to fetch DS component documentation
 
 ## Behavior & Instruction
 
-1. Ask the designer for:
-   - **Figma link** to the specific frame, section, or page to inspect (required)
-   - **Notion DS page links** for any components used in this design (optional — if not provided, search Notion automatically)
+1. **Collect inputs and verify connections**
 
-2. Extract the file key and node ID from the Figma link.
+   Check what was provided in the arguments. If the Figma URL is missing, ask for it.
 
-3. Use the Figma bridge to inspect the target:
-   - Get the file and node structure
-   - Identify all component instances used
-   - Read the actual fill, stroke, spacing, and text style values applied
-   - Check if values are tokens (semantic references) or hardcoded (raw hex, px, etc.)
+   Then verify:
+   - Confirm `FIGMA_ACCESS_TOKEN` is available. If not, ask the user to set it — remind them it must be a read-only token (`files:read` + `variables:read` scopes only, no write or delete permissions).
+   - Confirm Notion MCP is connected by making a lightweight call (`mcp__claude_ai_Notion__notion-fetch`). If it fails, tell the user: "Notion MCP is not connected — please check your MCP configuration before running this skill."
 
-4. Search Notion for the DS documentation of each component found. Fetch the relevant pages.
+2. **Extract IDs from the Figma URL**
+   - Extract the file key from the URL path
+   - Extract `node-id`, convert dashes to colons (e.g. `4605-4156` → `4605:4156`)
 
-5. Fetch shadcn documentation via WebFetch for any component types present, as a reference for expected patterns.
+3. **Inspect the target frame via Figma REST API**
+   ```
+   curl "https://api.figma.com/v1/files/{file_key}/nodes?ids={node_id}&depth=4" \
+     -H "X-Figma-Token: $FIGMA_ACCESS_TOKEN"
+   ```
 
-6. Load `context/rp-patterns.md` and `context/ds-conventions.md` as additional reference.
+   Extract:
+   - All component instances used (names, which DS components they are)
+   - All fill values — check for raw hex colors (no token binding)
+   - All spacing values (`paddingLeft/Right/Top/Bottom`, `itemSpacing`) — check for arbitrary px values
+   - All text style references — check if they're using DS type tokens
+   - All border-radius values — flag non-zero values with no token binding
+   - Layer names — check for generic names like "Frame 47" or "Rectangle 12"
+   - Frame naming — check for `[Flow] / [Screen] / [State]` convention
 
-7. Run checks across these dimensions:
+   **Token audit accuracy rules:**
+   - `boundVariables` with empty string value (`""`) is not a hardcoded value. Cross-check the actual pixel value.
+   - `cornerRadius: 0` and `rectangleCornerRadii: [0,0,0,0]` with no binding are not violations.
+   - Only flag non-zero fills, spacings, or radii with no variable binding.
+   - **External library tokens** have a long hash prefix before `/` (e.g. `VariableID:2348e5af.../1699:241`). Flag separately from hardcoded values.
+
+4. **Fetch Notion DS docs** for each DS component found in the frame
+
+   Search Notion for the component's documentation page. Fetch and extract the correct variant usage rules from the `## Variants & Properties` section. Use this to check if components are being used correctly.
+
+5. **Fetch shadcn docs** (WebFetch) for relevant component types as a pattern reference
+   - `https://ui.shadcn.com/docs/components/{component-name}`
+
+6. **Run checks across these dimensions:**
 
    **Tokens**
-   - Are all fills using semantic tokens (not raw hex)?
-   - Are all spacing values using spacing tokens (not arbitrary px)?
-   - Are all text styles using type tokens?
-   - Are all border-radius values using radius tokens?
+   - All fills using semantic tokens (not raw hex)?
+   - All spacing values using spacing tokens (not arbitrary px)?
+   - All text styles using DS type tokens?
+   - All border-radius values using radius tokens (non-zero only)?
 
    **Components**
-   - Are all components from the DS (not custom/detached instances)?
-   - Are component variants being used as documented in Notion?
-   - Are any components being overridden in ways that bypass tokens?
+   - All components from the DS (not custom/detached instances)?
+   - Component variants used as documented in Notion?
+   - Any components overridden in ways that bypass tokens?
 
    **Layout**
    - Does the layout follow the DS grid and spacing system?
-   - Are sections structured consistently with the section-based layout pattern?
    - Is spacing between elements consistent with DS spacing tokens?
 
    **Naming**
-   - Do frame names follow the convention: `[Flow] / [Screen] / [State]`?
-   - Are layer names descriptive (not "Frame 47" or "Rectangle 12")?
-   - Are component names matching their DS counterparts exactly?
+   - Frame names follow `[Flow] / [Screen] / [State]` convention?
+   - Layer names descriptive (not "Frame 47" or "Rectangle 12")?
 
    **States**
-   - Are all required states designed: Default, Empty, Loading, Error, Disabled?
-   - For forms: are Validation error and Success states present?
-   - Are any interactive elements missing hover/focus states?
+   - All required states designed: Default, Empty, Loading, Error, Disabled?
+   - For forms: Validation error and Success states present?
+   - Interactive elements have hover/focus states?
 
-   **Responsive**
-   - Is there a mobile variant for screens that require it?
-   - Does the layout adapt correctly at smaller breakpoints?
-
-8. Output a report in this format:
+7. **Output report:**
 
    ```
    ## Design QA Report — [Frame/Page name]
@@ -116,8 +129,6 @@ Do not proceed without the bridge — the output will be inaccurate.
 
    If no issues found in a category, omit that section. If everything passes, say so clearly.
 
-9. After the report, check if any new RP patterns were observed that aren't already in `context/rp-patterns.md`. If so, say: "I noticed a pattern not yet documented: [description]. Should I add it to the RP patterns reference?"
-
 ## Examples
 
 - "QA this frame: [Figma link to the Add Worker flow]"
@@ -126,7 +137,6 @@ Do not proceed without the bridge — the output will be inaccurate.
 
 ## Security & Safety
 
-- Figma reads: auto-approved via hooks (no permission prompt)
-- Notion reads: auto-approved via hooks
-- No writes to Figma, Notion, or Jira
-- No confirmation needed — this skill is read-only
+- Figma REST API read — non-destructive.
+- Notion reads — non-destructive.
+- No writes anywhere, no confirmation needed.

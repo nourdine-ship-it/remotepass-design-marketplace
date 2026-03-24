@@ -10,28 +10,12 @@
   },
   "plugins": [
     {
-      "name": "copy",
-      "description": "UX copy and microcopy generation aligned to RemotePass voice and tone",
-      "source": "./plugins/copy",
-      "version": "1.0.0",
-      "author": { "name": "Nourdine", "email": "nourdine@remotepass.com" },
-      "keywords": ["copy", "ux-writing", "microcopy", "voice", "tone"]
-    },
-    {
       "name": "critique",
       "description": "Structured design critique across UX dimensions with actionable fixes",
       "source": "./plugins/critique",
       "version": "1.0.0",
       "author": { "name": "Nourdine", "email": "nourdine@remotepass.com" },
       "keywords": ["critique", "review", "ux", "feedback", "heuristics"]
-    },
-    {
-      "name": "specs",
-      "description": "Engineering-ready component specs for developer handoff",
-      "source": "./plugins/specs",
-      "version": "1.0.0",
-      "author": { "name": "Nourdine", "email": "nourdine@remotepass.com" },
-      "keywords": ["specs", "handoff", "components", "engineering", "props"]
     },
     {
       "name": "design-system",
@@ -48,30 +32,6 @@
       "version": "1.0.0",
       "author": { "name": "Nourdine", "email": "nourdine@remotepass.com" },
       "keywords": ["qa", "design-system", "tokens", "accessibility", "ux-audit", "copy-audit"]
-    },
-    {
-      "name": "handoff",
-      "description": "Consistent developer handoff specs — same sections and style as EOR contract editing reference every time",
-      "source": "./plugins/handoff",
-      "version": "1.0.0",
-      "author": { "name": "Nourdine", "email": "nourdine@remotepass.com" },
-      "keywords": ["handoff", "specs", "dev", "figma", "notion"]
-    },
-    {
-      "name": "research",
-      "description": "Research synthesis and competitive analysis for the RemotePass design team",
-      "source": "./plugins/research",
-      "version": "1.0.0",
-      "author": { "name": "Nourdine", "email": "nourdine@remotepass.com" },
-      "keywords": ["research", "synthesis", "competitive", "insights", "themes"]
-    },
-    {
-      "name": "workflow",
-      "description": "Design workflow tools — briefs from Jira tickets and design decision documentation",
-      "source": "./plugins/workflow",
-      "version": "1.0.0",
-      "author": { "name": "Nourdine", "email": "nourdine@remotepass.com" },
-      "keywords": ["workflow", "design-brief", "decision", "jira", "notion"]
     }
   ]
 }

@@ -10,6 +10,22 @@ allow() {
   exit 0
 }
 
+# Auto-approve file reads and web fetching (both read-only)
+case "$tool_name" in
+  Read|\
+  WebFetch)
+    allow
+    ;;
+esac
+
+# Auto-approve Bash commands that read from the Figma REST API
+if [ "$tool_name" = "Bash" ]; then
+  command=$(echo "$input" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('tool_input',{}).get('command',''))")
+  if echo "$command" | grep -qE '^curl "https://api\.figma\.com/v1/'; then
+    allow
+  fi
+fi
+
 # Auto-approve Figma read-only operations
 case "$tool_name" in
   mcp__figma-mcp-server__get_file_structure|\
