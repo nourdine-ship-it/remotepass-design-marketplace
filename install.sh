@@ -26,8 +26,9 @@ while IFS= read -r -d '' skill; do
   else
     skill_name="$parent"
   fi
-  target="$SKILLS_DIR/${skill_name}.md"
-  ln -sf "$skill" "$target"
+  skill_dir=$(dirname "$skill")
+  target="$SKILLS_DIR/${skill_name}"
+  ln -sf "$skill_dir" "$target"
   echo "  + /${skill_name}"
   ((linked++)) || true
 done < <(find "$REPO_DIR/plugins" -name "SKILL.md" -print0)
