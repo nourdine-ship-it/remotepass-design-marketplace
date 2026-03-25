@@ -50,7 +50,7 @@ Ask Nourdine for the MCP config block — it's a few lines that go into `~/.clau
 
 | Skill | Requires |
 |---|---|
-| `/design-review` | `FIGMA_ACCESS_TOKEN` |
+| `/design-review:qa` | `FIGMA_ACCESS_TOKEN` |
 | `/component-documentation`, `/component-peer-review` | `FIGMA_ACCESS_TOKEN` + Notion MCP |
 
 ---

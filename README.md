@@ -8,7 +8,7 @@ Claude Code plugins for the RemotePass design team. Install once — all skills 
 
 | Plugin | Skills |
 |---|---|
-| Design Review | `/design-review` |
+| Design Review | `/design-review:qa` |
 | Design System | `/component-documentation` · `/component-peer-review` |
 
 Type `/` in Claude Code to see all available skills and trigger them with natural language.
@@ -84,7 +84,7 @@ remotepass-design-marketplace/
 ### 🔍 Design Review
 | Skill | What it does | Example trigger |
 |---|---|---|
-| `/design-review` | Structured critique across 5 UX dimensions with concrete fixes | "Review this design before I share it with the team" |
+| `/design-review:qa` | Structured critique across 6 UX dimensions with concrete fixes | "Review this design before I share it with the team" |
 
 ### 🧱 Design System
 | Skill | What it does | Example trigger |
