@@ -1,27 +1,27 @@
 ---
 title: Component Documentation
 description: Full workflow — inspect a Figma component via REST API, cross-check shadcn, confirm findings, then write structured documentation to a Notion page
-version: 1.1.0
+version: 1.2.0
 requires: |
   - Figma component URL (required) — the component set to document
   - Notion page URL (required) — an empty page the user has already created for this component
   - FIGMA_ACCESS_TOKEN environment variable — for REST API access
-  - Notion MCP connected — for writing to the Notion page
-allowed-tools: WebFetch, Read, Bash
+  - Notion MCP connected — for reading and writing Notion pages
+allowed-tools: WebFetch, Read, Bash, mcp__claude_ai_Notion__notion-fetch, mcp__claude_ai_Notion__notion-search, mcp__claude_ai_Notion__notion-update-page
 argument-hint: "[figma-url] [notion-url]"
 ---
 
-## Summary
+## What is this about?
 
 Full documentation workflow for a RemotePass design system component. Inspects the component via the Figma REST API, cross-checks against shadcn and Radix UI, presents findings for confirmation, then writes structured documentation to the provided Notion page in the exact format the DS uses.
 
-## Why this is useful
+## What is the value?
 
 Documentation written without inspecting the actual Figma data drifts from reality. This skill reads the component directly, presents what it finds for designer confirmation, then writes to Notion — so docs match what was actually built.
 
-## Key features
+## What does it do?
 
-- Figma REST API inspection — no bridge CLI required
+- Figma REST API inspection
 - shadcn + Radix cross-check for structural deviations
 - Findings confirmation before writing — designer can correct anything
 - Figma improvement suggestions (naming, tokens, missing states)
@@ -29,21 +29,21 @@ Documentation written without inspecting the actual Figma data drifts from reali
 - Sets Figma URL as a database property, not inline in content
 - Custom component support — purple callout + omits Deviations section
 
-## Triggers
+## When to call it?
 
 - "Document the Checkbox component for the design system"
 - "Write DS docs for the new Tag component"
 - "I need to add the DatePicker to Notion — document it"
 - "Document this component following our standard format"
 
-## Prerequisites
+## What is needed?
 
 - **Figma component URL** (required) — the component set to document
 - **Notion page URL** (required) — an empty page you've already created for this component (place it next to Button, Radio Group, Checkbox in the Components section)
 - **Figma REST API token** — set as `FIGMA_ACCESS_TOKEN` in the environment. Must be a **read-only token**: grant only `files:read` and `variables:read` scopes. Do not grant write, delete, or update permissions.
 - **Notion MCP connected** — used to write the documentation page
 
-## Behavior & Instruction
+## How does it work?
 
 1. **Collect inputs and verify connections**
 
@@ -86,7 +86,7 @@ Documentation written without inspecting the actual Figma data drifts from reali
 
 4. **Cross-check with shadcn and Radix UI** (WebFetch)
    - `https://ui.shadcn.com/docs/components/{component-name}`
-   - `https://www.radix-ui.com/primitives/docs/components/{component-name}` (if a primitive exists)
+   - `https://www.radix-ui.com/primitives/docs/components/{component-name}` (if a Radix component exists)
 
    Compare:
    - Are all shadcn states/variants present in Figma?
@@ -140,7 +140,7 @@ Documentation written without inspecting the actual Figma data drifts from reali
    1. `## Description` — 1–2 sentences describing the component. No inline Figma link.
    2. `## Changelog` — table: Date / Designer / Change. Today's date, designer = Nourdine, change = "Initial documentation — [summary of variants and states]. Shadcn/ui alignment." For custom components: "Custom component, no shadcn alignment."
    3. `---`
-   4. `## References` — shadcn/ui source link + Radix UI primitive link. If no Radix primitive: "No underlying Radix primitive — shadcn [Component] is a pure styled component (HTML only)." For custom: "No shadcn/ui component — [Component] is a custom RemotePass component with no shadcn or Radix UI counterpart."
+   4. `## References` — shadcn/ui source link (`https://ui.shadcn.com/docs/components/{component-name}`) + Radix UI link (`https://www.radix-ui.com/primitives/docs/components/{component-name}`). If no Radix component: "No Radix UI component — shadcn [Component] is a pure styled component (HTML only)." For custom: "No shadcn/ui component — [Component] is a custom RemotePass component with no shadcn or Radix UI counterpart."
    5. `---`
    6. `## Deviations from shadcn` — **shadcn components only; omit entirely for custom components.** Structural deviations only (added sub-components, renamed/added/removed properties, extra or missing variants/states). Do NOT include visual/styling differences. If no structural deviations: single green callout: `<callout color="green_bg">**Perfect shadcn match** — No deviations. All variants and states map directly to shadcn behaviour.</callout>`. If deviations exist: one yellow callout per deviation: `<callout color="yellow_bg">**Category** — explanation + implementation note.</callout>`. Then `---`.
    7. `## Variants & Properties` — one `###` sub-section per sub-component, 3-column table (Property / Values / Notes)
@@ -169,13 +169,13 @@ Documentation written without inspecting the actual Figma data drifts from reali
    ```
    Do not include the Figma link inline in the page content.
 
-## Examples
+## Some examples
 
 - "Document the Badge component — here's the Figma link and the empty Notion page"
 - "Write DS docs for the Combobox: [figma-url] [notion-url]"
 - "Document this component following the standard format"
 
-## Security & Safety
+## Security notes
 
 - Figma REST API read — non-destructive.
 - Notion read (reference page) — non-destructive.
@@ -185,8 +185,12 @@ Documentation written without inspecting the actual Figma data drifts from reali
 ## Key references
 
 - Figma DS file key: `68BjBAp23kbcFrNQ9bK6jP`
+- Figma DS file URL: `https://www.figma.com/design/68BjBAp23kbcFrNQ9bK6jP/RemotePass-Design-System`
 - Figma API token: `$FIGMA_ACCESS_TOKEN`
+- RemotePass DS Notion docs: `https://www.notion.so/remotepass/RemotePass-Design-System-254c5c4e315080bc9db4f3bc75fa129a`
 - Radio Group reference page (Notion): `314c5c4e-3150-801a-a782-d29fe8cf30cb`
+- shadcn docs base: `https://ui.shadcn.com/docs/components`
+- Radix UI docs base: `https://www.radix-ui.com/primitives/docs/components`
 - Designer name for changelog: Nourdine
 - External token IDs: long hash prefix before `/` (e.g. `VariableID:2348e5af.../1699:241`)
 - Local token IDs: short numeric (e.g. `VariableID:132:42`)

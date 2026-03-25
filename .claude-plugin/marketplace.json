@@ -5,33 +5,25 @@
     "email": "nourdine@remotepass.com"
   },
   "metadata": {
-    "description": "Claude Code plugins for the RemotePass design team — QA, handoff, copy, critique, specs, research, and workflow",
-    "version": "1.0.0"
+    "description": "Claude Code plugins for the RemotePass design team — design review, component documentation, and peer review",
+    "version": "1.0.1"
   },
   "plugins": [
     {
-      "name": "critique",
-      "description": "Structured design critique across UX dimensions with actionable fixes",
-      "source": "./plugins/critique",
-      "version": "1.0.0",
+      "name": "design-review",
+      "description": "Structured design critique across 6 UX dimensions with actionable fixes sorted by severity",
+      "source": "./plugins/design-review",
+      "version": "1.0.1",
       "author": { "name": "Nourdine", "email": "nourdine@remotepass.com" },
-      "keywords": ["critique", "review", "ux", "feedback", "heuristics"]
+      "keywords": ["design-review", "critique", "review", "ux", "feedback", "heuristics"]
     },
     {
       "name": "design-system",
       "description": "Component documentation and peer review for the RemotePass design system",
       "source": "./plugins/design-system",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "author": { "name": "Nourdine", "email": "nourdine@remotepass.com" },
-      "keywords": ["design-system", "components", "documentation", "tokens", "figma"]
-    },
-    {
-      "name": "qa",
-      "description": "Design QA, copy audit, accessibility checks, and UX heuristic reviews for the RemotePass redesign",
-      "source": "./plugins/qa",
-      "version": "1.0.0",
-      "author": { "name": "Nourdine", "email": "nourdine@remotepass.com" },
-      "keywords": ["qa", "design-system", "tokens", "accessibility", "ux-audit", "copy-audit"]
+      "keywords": ["design-system", "components", "documentation", "tokens", "figma", "notion"]
     }
   ]
 }

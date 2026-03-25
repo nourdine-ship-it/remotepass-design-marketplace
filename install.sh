@@ -16,9 +16,16 @@ echo ""
 mkdir -p "$SKILLS_DIR"
 
 # Symlink all SKILL.md files into ~/.claude/skills/ (flattened, named by skill folder)
+# If SKILL.md sits directly in a skills/ folder (no subfolder), use the plugin name instead
 linked=0
 while IFS= read -r -d '' skill; do
-  skill_name=$(basename "$(dirname "$skill")")
+  parent=$(basename "$(dirname "$skill")")
+  if [ "$parent" = "skills" ]; then
+    # No subfolder — climb up to the plugin folder for the name
+    skill_name=$(basename "$(dirname "$(dirname "$skill")")")
+  else
+    skill_name="$parent"
+  fi
   target="$SKILLS_DIR/${skill_name}.md"
   ln -sf "$skill" "$target"
   echo "  + /${skill_name}"
@@ -45,7 +52,7 @@ if [[ "$answer" =~ ^[Yy]$ ]]; then
     {
       echo ""
       echo "$MARKER"
-      cat "$REPO_DIR/claude-md/CLAUDE.md"
+      cat "$REPO_DIR/CLAUDE.md"
       echo "$MARKER"
     } >> "$GLOBAL_CLAUDE"
     echo "  Added to $GLOBAL_CLAUDE"

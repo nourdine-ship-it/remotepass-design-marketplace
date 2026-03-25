@@ -1,5 +1,5 @@
 {
-  "name": "critique",
+  "name": "design-review",
   "version": "1.0.0",
   "description": "Structured design critique across UX dimensions with actionable fixes",
   "author": { "name": "Nourdine", "email": "nourdine@remotepass.com" },

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Auto-approve safe read-only operations for critique plugin
+# Auto-approve safe read-only operations for design-review plugin
 set -euo pipefail
 
 input=$(cat)
@@ -25,6 +25,14 @@ if [ "$tool_name" = "Bash" ]; then
     allow
   fi
 fi
+
+# Auto-approve Notion read-only operations
+case "$tool_name" in
+  mcp__claude_ai_Notion__notion-fetch|\
+  mcp__claude_ai_Notion__notion-search)
+    allow
+    ;;
+esac
 
 # All other operations fall through to normal permission flow
 exit 0

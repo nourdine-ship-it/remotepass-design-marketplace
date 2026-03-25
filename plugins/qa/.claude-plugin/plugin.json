@@ -1,8 +1,0 @@
-{
-  "name": "qa",
-  "version": "1.0.0",
-  "description": "Design QA, copy audit, accessibility checks, and UX heuristic reviews for the RemotePass redesign",
-  "author": { "name": "Nourdine", "email": "nourdine@remotepass.com" },
-  "repository": "https://github.com/nourdine-ship-it/remotepass-design-marketplace",
-  "keywords": ["qa", "design-system", "tokens", "accessibility", "ux-audit", "copy-audit"]
-}

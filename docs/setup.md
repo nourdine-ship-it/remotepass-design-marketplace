@@ -15,9 +15,8 @@ Open Claude Code and run:
 Then install each plugin:
 
 ```
-/plugin install critique@remotepass-design-marketplace
+/plugin install design-review@remotepass-design-marketplace
 /plugin install design-system@remotepass-design-marketplace
-/plugin install qa@remotepass-design-marketplace
 ```
 
 Type `/` to confirm all skills are available.
@@ -51,9 +50,8 @@ Ask Nourdine for the MCP config block — it's a few lines that go into `~/.clau
 
 | Skill | Requires |
 |---|---|
-| `/ux-audit`, `/copy-audit` | Nothing extra — works out of the box |
-| `/design-review`, `/a11y-check` | `FIGMA_ACCESS_TOKEN` |
-| `/design-qa`, `/component-documentation`, `/peer-review` | `FIGMA_ACCESS_TOKEN` + Notion MCP |
+| `/design-review` | `FIGMA_ACCESS_TOKEN` |
+| `/component-documentation`, `/component-peer-review` | `FIGMA_ACCESS_TOKEN` + Notion MCP |
 
 ---
 
@@ -72,7 +70,7 @@ Plugin updates are picked up automatically — no reinstall needed. If a new plu
 ## Troubleshooting
 
 **A skill isn't showing up in Claude**
-→ Make sure you ran all three `/plugin install` commands. Type `/` to see available skills.
+→ Make sure you ran both `/plugin install` commands. Type `/` to see available skills.
 
 **Figma tools aren't working**
 → Check that `FIGMA_ACCESS_TOKEN` is set (`echo $FIGMA_ACCESS_TOKEN`). If empty, add it to your shell profile and restart.
