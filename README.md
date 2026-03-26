@@ -9,6 +9,7 @@ Claude Code plugins for the RemotePass design team. Install once — all skills 
 | Plugin | Skills |
 |---|---|
 | Design Review | `/qa` |
+| Design Handoff | `/readiness` |
 | Design System | `/component-documentation` · `/component-peer-review` |
 
 Type `/` in Claude Code to see all available skills and trigger them with natural language.
@@ -31,6 +32,7 @@ Still inside Claude Code, install each plugin:
 
 ```
 /plugin install design-review@remotepass-design-marketplace
+/plugin install design-handoff@remotepass-design-marketplace
 /plugin install design-system@remotepass-design-marketplace
 ```
 
@@ -60,7 +62,7 @@ remotepass-design-marketplace/
 │   └── marketplace.json          # Marketplace metadata & plugin registry
 ├── plugins/
 │   ├── SKILL_TEMPLATE.md         # Template for creating new skills
-│   └── [plugin-name]/            # One folder per plugin (design-review, design-system)
+│   └── [plugin-name]/            # One folder per plugin (design-review, design-handoff, design-system)
 │       ├── .claude-plugin/
 │       │   └── plugin.json       # Plugin metadata, name, version
 │       ├── hooks/
@@ -84,7 +86,12 @@ remotepass-design-marketplace/
 ### 🔍 Design Review
 | Skill | What it does | Example trigger |
 |---|---|---|
-| `/qa` | Structured critique across 6 UX dimensions with concrete fixes | "Review this design before I share it with the team" |
+| `/qa` | Structured critique across 5 UX dimensions including copy and tone | "Review this design before I share it with the team" |
+
+### 📋 Design Handoff
+| Skill | What it does | Example trigger |
+|---|---|---|
+| `/readiness` | Pre-handoff checklist — breakpoints, use cases, system states, DS compliance, changelog | "Is this design ready for dev?" |
 
 ### 🧱 Design System
 | Skill | What it does | Example trigger |

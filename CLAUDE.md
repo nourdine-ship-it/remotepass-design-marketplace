@@ -44,7 +44,7 @@ remotepass-design-marketplace/
 │   └── marketplace.json          # Marketplace metadata & plugin registry
 ├── plugins/
 │   ├── SKILL_TEMPLATE.md         # Template for creating new skills
-│   └── [plugin-name]/            # One folder per plugin (design-review, design-system)
+│   └── [plugin-name]/            # One folder per plugin (design-review, design-handoff, design-system)
 │       ├── .claude-plugin/
 │       │   └── plugin.json       # Plugin metadata, name, version
 │       ├── hooks/
