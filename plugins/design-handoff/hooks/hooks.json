@@ -18,6 +18,15 @@
             "command": "${CLAUDE_PLUGIN_ROOT}/hooks/design-handoff-hooks.sh"
           }
         ]
+      },
+      {
+        "matcher": "mcp__figma-mcp-server__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/design-handoff-hooks.sh"
+          }
+        ]
       }
     ]
   }

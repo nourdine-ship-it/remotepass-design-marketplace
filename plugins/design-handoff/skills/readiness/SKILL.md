@@ -76,7 +76,7 @@ These are always referenced — do not ask the user for them:
    Extract from the response:
    - All frames and their names — identify breakpoint variants (desktop, mobile, tablet)
    - All component instances and their source component names
-   - Variable bindings on fills, strokes, spacing, and text styles — note any properties with raw hardcoded values instead of bound variables
+   - Variable bindings on fills, strokes, spacing, and text styles — note any properties with raw hardcoded values instead of bound variables. When traversing children to extract variable bindings and detect hardcoded values, skip any node where `visible === false` entirely — do not descend into hidden layers.
    - Layer names and nesting structure
    - Visible states, variants, and interaction labels
    - Text layer content for length variation assessment
@@ -107,7 +107,9 @@ These are always referenced — do not ask the user for them:
 
    ### System states
    Context-aware — infer from the feature what states are expected, then verify each is designed:
-   - Loading
+   - **Skeleton / page-level loading** — placeholder layout shown while the page or section loads
+   - **Button loading** — spinner or disabled state on a CTA during an async action
+   - **Component-level loading** — data-fetching components (combobox, dropdown, table, select) that have their own loading state while fetching options or results
    - Error (inline validation, API failure, empty results)
    - Success / confirmation
    - Any other interaction or behaviour relevant to the specific flow
@@ -126,6 +128,9 @@ These are always referenced — do not ask the user for them:
    ### DS compliance
    - All component instances match their canonical counterpart in the RemotePass DS Figma library
    - All fills, strokes, spacing values, and text styles are bound to DS variables and tokens — no hardcoded values
+   - When checking for hardcoded fills, apply the following exclusions:
+     - **Hidden layers** — skip any node where `visible === false`. Do not report hardcoded fills on hidden layers or their children.
+     - **Flag icon components** — skip `INSTANCE` nodes whose name matches flag icon patterns (e.g. country flags such as `flag-us`, `flag-gb`, `Flag / US`, `Flag / GB`). These use locale-specific colors by design. Do not flag hardcoded fills on these instances or their children.
    - Cross-reference Notion docs for the relevant components and foundations to confirm correct usage
    - Cross-reference shadcn for structural alignment where applicable
 

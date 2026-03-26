@@ -34,5 +34,12 @@ case "$tool_name" in
     ;;
 esac
 
+# Auto-approve all Figma MCP server operations (read-only by design)
+case "$tool_name" in
+  mcp__figma-mcp-server__*)
+    allow
+    ;;
+esac
+
 # All other operations fall through to normal permission flow
 exit 0

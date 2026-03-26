@@ -26,6 +26,13 @@ if [ "$tool_name" = "Bash" ]; then
   fi
 fi
 
+# Auto-approve all Figma MCP server operations (read-only by design)
+case "$tool_name" in
+  mcp__figma-mcp-server__*)
+    allow
+    ;;
+esac
+
 # Auto-approve Notion read-only operations
 case "$tool_name" in
   mcp__claude_ai_Notion__notion-fetch|\
