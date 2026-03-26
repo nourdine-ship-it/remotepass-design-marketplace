@@ -24,6 +24,14 @@
       "version": "1.0.1",
       "author": { "name": "Nourdine", "email": "nourdine@remotepass.com" },
       "keywords": ["design-system", "components", "documentation", "tokens", "figma", "notion"]
+    },
+    {
+      "name": "handoff",
+      "description": "mew handoff plugin",
+      "source": "./plugins/handoff",
+      "version": "1.0.0",
+      "author": { "name": "Nourdine", "email": "nourdine@remotepass.com" },
+      "keywords": ["handoff"]
     }
   ]
 }
