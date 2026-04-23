@@ -134,22 +134,21 @@ These are always referenced — do not ask the user for them:
 
    When a rule fails or a typo is found: note the location, the current copy, the rule ID (or "Typo"), and write the corrected version.
 
-8. **Output findings sorted by severity**
+8. **Output findings as a table, grouped by severity**
 
-   Group all issues into:
+   Group all issues into four severity sections, each with a short heading:
    - **Critical** — misleading or broken copy that would cause a user to fail a task
    - **High** — wrong pattern, passive voice, vague CTA, broken placeholder or error rule
    - **Medium** — word case error, punctuation, vocabulary violation, or tone mismatch
    - **Low** — typos, polish, minor rewording suggestions
 
-   For each issue, provide enough context for the designer to locate the element without hunting:
-   ```
-   [RULE-ID]
-   Where: [page name] → [frame or section name] → [layer name or element description]
-   Current: "[exact copy as written]"
-   Issue: [what rule it breaks or pattern it deviates from]
-   Fix: "[corrected version]"
-   ```
+   Within each section, render a markdown table with these columns:
+
+   | Item | Where | Issue | Fix | Why |
+   |---|---|---|---|---|
+   | The exact copy as written in the design | Frame → section → element (enough to find it without hunting) | What is wrong, in plain language — no rule codes | The corrected version | One sentence explaining the underlying principle |
+
+   Do not include rule IDs or codes anywhere in the output — translate every rule into plain language that a non-specialist can act on immediately.
 
    If no issues found: "Hark — not a single comma out of place. Shakespeare himself would've shipped this. ✓"
 
