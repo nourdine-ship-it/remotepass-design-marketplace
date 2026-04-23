@@ -134,21 +134,29 @@ These are always referenced — do not ask the user for them:
 
    When a rule fails or a typo is found: note the location, the current copy, the rule ID (or "Typo"), and write the corrected version.
 
-8. **Output findings as a table, grouped by severity**
+8. **Output**
 
-   Group all issues into four severity sections, each with a short heading:
-   - **Critical** — misleading or broken copy that would cause a user to fail a task
-   - **High** — wrong pattern, passive voice, vague CTA, broken placeholder or error rule
-   - **Medium** — word case error, punctuation, vocabulary violation, or tone mismatch
-   - **Low** — typos, polish, minor rewording suggestions
+   **Header (always first):**
+   State the total number of text layers checked, the number of screens covered, and a confidence level:
+   - **High** — all layers were reachable at depth 10 with no truncation
+   - **Medium** — some component instances were fetched separately; coverage is likely complete but not guaranteed
+   - **Low** — depth limit was hit on multiple components; some nested text may have been missed
 
-   Within each section, render a markdown table with these columns:
+   Format:
+   > {N} text layers checked across {M} screens. Confidence: {level}{optional note on what may have been missed}. Findings are based on the [RemotePass UX Writing Guidelines](https://www.notion.so/remotepass/UX-Writing-Guidelines-34ac5c4e315081af914eedcf96a37688).
 
-   | Item | Where | Issue | Fix | Why |
-   |---|---|---|---|---|
-   | The exact copy as written in the design | Frame → section → element (enough to find it without hunting) | What is wrong, in plain language — no rule codes | The corrected version | One sentence explaining the underlying principle |
+   **Findings — grouped by severity, one table per group:**
 
-   Do not include rule IDs or codes anywhere in the output — translate every rule into plain language that a non-specialist can act on immediately.
+   Severity order: Critical → High → Medium → Low. Only include groups that have findings. Each group header includes the count: e.g. **Critical (2)**, **High (5)**.
+
+   Within each group, render a markdown table:
+
+   | Copy | Where | Issue | Fix |
+   |---|---|---|---|
+   | The exact copy as written | Screen name · mode (light / dark) · element type (e.g. Button, Field label, Error message) | What is wrong, in plain language — only include when the fix alone is not self-explanatory. Leave blank otherwise. No rule codes, no jargon. | The corrected version |
+
+   **Footer (always last):**
+   > Want me to explain why any of these were flagged? I can also apply the fixes directly in Figma — just say the word.
 
    If no issues found: "Hark — not a single comma out of place. Shakespeare himself would've shipped this. ✓"
 
