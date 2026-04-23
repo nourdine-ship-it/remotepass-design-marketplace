@@ -8,7 +8,7 @@ Claude Code plugins for the RemotePass design team. Install once — all skills 
 
 | Plugin | Skills |
 |---|---|
-| Design Review | `/qa` |
+| Design Review | `/qa` · `/copy` |
 | Design Handoff | `/readiness` |
 | Design System | `/component-documentation` · `/component-peer-review` |
 
@@ -86,7 +86,8 @@ remotepass-design-marketplace/
 ### 🔍 Design Review
 | Skill | What it does | Example trigger |
 |---|---|---|
-| `/qa` | Structured critique across 5 UX dimensions including copy and tone | "Review this design before I share it with the team" |
+| `/qa` | Structured critique across 4 UX dimensions — extracts Figma layer data, delivers actionable feedback sorted by severity | "Review this design before I share it with the team" |
+| `/copy` | UX writing review against RemotePass UX Writing Guidelines — extracts text layers, applies rule IDs by element type, delivers findings with corrected versions | "Review the copy on this screen" |
 
 ### 📋 Design Handoff
 | Skill | What it does | Example trigger |
