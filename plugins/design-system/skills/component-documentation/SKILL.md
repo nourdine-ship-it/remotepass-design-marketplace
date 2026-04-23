@@ -1,13 +1,13 @@
 ---
 title: Component Documentation
 description: Full workflow — inspect a Figma component via REST API, cross-check shadcn, confirm findings, then write structured documentation to a Notion page
-version: 1.2.0
+version: 1.2.1
 requires: |
   - Figma component URL (required) — the component set to document
   - Notion page URL (required) — an empty page the user has already created for this component
   - FIGMA_ACCESS_TOKEN environment variable — for REST API access
   - Notion MCP connected — for reading and writing Notion pages
-allowed-tools: WebFetch, Read, Bash, mcp__claude_ai_Notion__notion-fetch, mcp__claude_ai_Notion__notion-search, mcp__claude_ai_Notion__notion-update-page
+allowed-tools: WebFetch, Read, Bash, Edit, Write, mcp__claude_ai_Notion__notion-fetch, mcp__claude_ai_Notion__notion-search, mcp__claude_ai_Notion__notion-update-page
 argument-hint: "[figma-url] [notion-url]"
 ---
 
@@ -53,8 +53,27 @@ Documentation written without inspecting the actual Figma data drifts from reali
 
    If either is missing, ask before proceeding.
 
-   Then verify:
-   - Confirm `FIGMA_ACCESS_TOKEN` is available in the environment. If not, ask the user to set it — remind them it must be a read-only token (`files:read` + `variables:read` scopes only, no write or delete permissions).
+   Then verify token and connections:
+   - **If `FIGMA_ACCESS_TOKEN` is not set:** show the friendly collection flow —
+     > "Don't worry, Nourdine thought of this 👋 I need a Figma access token to read the file. Two options:
+     > **A** — Paste your token here and I'll save it automatically. You won't need to do this again. Note: the token must have `files:read` and `variables:read` scopes — no write or delete permissions.
+     > **B** — Save it yourself: open `~/.claude/settings.local.json` and add `"FIGMA_ACCESS_TOKEN": "your-token-here"` under the `"env"` key."
+
+     If the user chooses A: write the token to `~/.claude/settings.local.json` under `env.FIGMA_ACCESS_TOKEN`, then continue.
+
+   - **If `FIGMA_ACCESS_TOKEN` is set:** call `GET /v1/me` to verify it is valid —
+     ```bash
+     curl "https://api.figma.com/v1/me" -H "X-Figma-Token: $FIGMA_ACCESS_TOKEN"
+     ```
+     If the response is not 200, stop and tell the user their token is invalid or expired — they need to generate a new one.
+
+   - **Scope check:** call `GET /v1/files/{file_key}/variables/local` to verify the token has `variables:read` scope —
+     ```bash
+     curl "https://api.figma.com/v1/files/{file_key}/variables/local" \
+       -H "X-Figma-Token: $FIGMA_ACCESS_TOKEN"
+     ```
+     If the response is 403, stop and tell the user to regenerate their token with `variables:read` scope added.
+
    - Confirm Notion MCP is connected by making a lightweight call (`mcp__claude_ai_Notion__notion-fetch` with the page ID). If it fails, tell the user: "Notion MCP is not connected — please check your MCP configuration before running this skill."
 
    Do not proceed until both URLs are provided and both connections are confirmed.

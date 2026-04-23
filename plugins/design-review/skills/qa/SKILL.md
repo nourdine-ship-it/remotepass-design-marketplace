@@ -1,17 +1,17 @@
 ---
 title: Design Review
-description: Structured critique across 5 UX dimensions including copy and tone — extracts Figma layer data, delivers actionable feedback sorted by severity
-version: 1.4.0
+description: Structured critique across 4 UX dimensions — extracts Figma layer data, delivers actionable feedback sorted by severity
+version: 1.5.2
 requires: |
   - Figma frame URL (required)
   - FIGMA_ACCESS_TOKEN (required for private files — set as env var with files:read scope)
-allowed-tools: WebFetch, Bash
+allowed-tools: WebFetch, Bash, Edit, Write
 argument-hint: "[figma-url]"
 ---
 
 ## What is this about?
 
-Structured, honest critique of a design across five dimensions. Extracts the actual Figma layer tree — text content, component names, nesting, states — then delivers specific, actionable findings sorted by severity.
+Structured, honest critique of a design across four dimensions. Extracts the actual Figma layer tree — text content, component names, nesting, states — then delivers specific, actionable findings sorted by severity.
 
 ## What is the value?
 
@@ -20,7 +20,7 @@ Critique without a shared framework produces vague, inconsistent feedback. Readi
 ## What does it do?
 
 - Extracts layer structure, text layers, component instances, and nesting from Figma
-- Reviews across five fixed dimensions to ensure full coverage — including copy and tone against RemotePass voice guidelines
+- Reviews across four fixed dimensions to ensure full coverage
 - Delivers one concrete fix per issue, sorted by severity
 
 ## When to call it?
@@ -33,13 +33,27 @@ Critique without a shared framework produces vague, inconsistent feedback. Readi
 ## What is needed?
 
 - **Figma frame URL** — the specific frame, screen, or flow to review
-- **`FIGMA_ACCESS_TOKEN`** — only required if the file is private. Set in environment with `files:read` scope only (no write or delete permissions). If missing and the file is inaccessible, ask the user to set it.
+- **`FIGMA_ACCESS_TOKEN`** — required for private files. Set in environment with `files:read` scope only (no write or delete permissions). If missing, a friendly setup flow will guide you through saving it — you won't need to do this again. If present but invalid, the skill stops and tells you what to fix.
 
 ## How does it work?
 
-1. **Check inputs**
+1. **Check inputs and token**
 
-   If the Figma URL is missing, ask for it. Check whether `FIGMA_ACCESS_TOKEN` is set in the environment — use it if available, skip the header if not. If the API call fails with a 403, ask the user to provide the token.
+   If the Figma URL is missing, ask for it.
+
+   Token flow:
+   - **If `FIGMA_ACCESS_TOKEN` is not set:** show the friendly collection flow —
+     > "Don't worry, Nourdine thought of this 👋 I need a Figma access token to read the file. Two options:
+     > **A** — Paste your token here and I'll save it automatically. You won't need to do this again.
+     > **B** — Save it yourself: open `~/.claude/settings.local.json` and add `"FIGMA_ACCESS_TOKEN": "your-token-here"` under the `"env"` key."
+
+     If the user chooses A: write the token to `~/.claude/settings.local.json` under `env.FIGMA_ACCESS_TOKEN`, then continue.
+
+   - **If `FIGMA_ACCESS_TOKEN` is set:** call `GET /v1/me` to verify it is valid —
+     ```bash
+     curl "https://api.figma.com/v1/me" -H "X-Figma-Token: $FIGMA_ACCESS_TOKEN"
+     ```
+     If the response is not 200, stop and tell the user their token is invalid or expired — they need to generate a new one.
 
 2. **Extract IDs from the design frame URL**
    - File key: from the URL path segment after `/file/` or `/design/`
@@ -59,13 +73,14 @@ Critique without a shared framework produces vague, inconsistent feedback. Readi
    - Visible states or variants
    - Frame dimensions and layout structure
 
-4. **Review across 5 dimensions**
+   Skip any node where `visible === false` — do not descend into hidden layers.
+
+4. **Review across 4 dimensions**
 
    - **Clarity** — Is it immediately obvious what to do and why? Are labels and CTAs unambiguous?
    - **Hierarchy** — Does the structure guide attention in the right order? Are primary and secondary actions visually distinct?
    - **Friction** — Where might a user hesitate, get confused, or drop off? Unnecessary steps or unclear inputs?
    - **Consistency** — Are patterns and interactions coherent with the rest of the product?
-   - **Copy & tone** — Does all microcopy (labels, CTAs, error messages, tooltips, placeholders, helper text) follow RemotePass voice guidelines? Clear, warm, direct — no jargon, no passive voice, no filler words ("seamlessly", "powerful", "robust", "leverage"). Placeholders: free text → `e.g. [realistic example]`, selects → `Select [noun]`. Never repeat the label in a placeholder.
 
 5. **Output findings sorted by severity**
 
@@ -76,3 +91,6 @@ Critique without a shared framework produces vague, inconsistent feedback. Readi
    - **Low** — polish, minor inconsistencies, or nice-to-haves
 
    For each issue: tag the dimension, state the observation referencing the exact layer name, text string, or component, and give one concrete fix.
+
+   After all findings, always close with:
+   > "Make your review complete — run /copy on this frame to check UX writing. Or don't, and risk shipping 'Cart' spelled as 'Fart'."

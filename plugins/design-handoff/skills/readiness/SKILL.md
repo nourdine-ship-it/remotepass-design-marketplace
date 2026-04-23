@@ -1,12 +1,12 @@
 ---
 title: Handoff Readiness
-description: Pre-handoff checklist — verifies breakpoints, use cases, system states, DS compliance, and changelog before a design moves to dev
-version: 1.0.0
+description: Pre-handoff checklist — verifies breakpoints, modes & themes, use cases, system states, DS compliance, and changelog before a design moves to dev
+version: 1.0.4
 requires: |
   - Figma frame URL (required)
-  - FIGMA_ACCESS_TOKEN (required for private files — set as env var with files:read scope)
+  - FIGMA_ACCESS_TOKEN (required for private files — set as env var with files:read and variables:read scopes)
   - Notion MCP (required — for reading RemotePass DS documentation)
-allowed-tools: WebFetch, Bash, mcp__claude_ai_Notion__notion-fetch, mcp__claude_ai_Notion__notion-search
+allowed-tools: WebFetch, Bash, Edit, Write, mcp__claude_ai_Notion__notion-fetch, mcp__claude_ai_Notion__notion-search
 argument-hint: "[figma-url]"
 ---
 
@@ -22,7 +22,7 @@ Designs that move to dev incomplete create rework. This skill catches missing st
 
 - Fetches the Figma frame and reads its layer structure, component instances, variable bindings, and visible states
 - Cross-references the RemotePass DS Figma library and Notion documentation to verify token and component usage
-- Checks all required breakpoints, use cases, system states, and text length variations
+- Checks all required breakpoints, modes & themes, use cases, system states, and text length variations
 - Flags naming and layer hygiene issues as advisory (non-blocking)
 - Verifies changelog presence on the Figma page
 - Prompts the designer to mark the frame as Ready for Dev in Figma
@@ -36,7 +36,7 @@ Designs that move to dev incomplete create rework. This skill catches missing st
 ## What is needed?
 
 - **Figma frame URL** — the specific frame, section, or flow to check
-- **`FIGMA_ACCESS_TOKEN`** — only required if the file is private. Set in environment with `files:read` scope only (no write or delete permissions). If missing and the file is inaccessible, ask the user to set it.
+- **`FIGMA_ACCESS_TOKEN`** — required for private files. Set in environment with `files:read` and `variables:read` scopes only (no write or delete permissions). If missing, a friendly setup flow will guide you through saving it — you won't need to do this again. If present but invalid or missing the `variables:read` scope, the skill stops and tells you what to fix.
 - **Notion MCP** — must be configured to access the RemotePass workspace. Used to read DS component documentation and foundations (colour, typography, spacing, layout).
 
 ## Fixed resources
@@ -48,19 +48,50 @@ These are always referenced — do not ask the user for them:
 
 ## How does it work?
 
-1. **Check inputs**
+1. **Check inputs and token**
 
-   If the Figma URL is missing, ask for it. Check whether `FIGMA_ACCESS_TOKEN` is set in the environment — use it if available, skip the header if not. If the API call fails with a 403, ask the user to provide the token.
+   If the Figma URL is missing, ask for it.
+
+   Token flow:
+   - **If `FIGMA_ACCESS_TOKEN` is not set:** show the friendly collection flow —
+     > "Don't worry, Nourdine thought of this 👋 I need a Figma access token to read the file. Two options:
+     > **A** — Paste your token here and I'll save it automatically. You won't need to do this again.
+     > **B** — Save it yourself: open `~/.claude/settings.local.json` and add `"FIGMA_ACCESS_TOKEN": "your-token-here"` under the `"env"` key."
+
+     If the user chooses A: write the token to `~/.claude/settings.local.json` under `env.FIGMA_ACCESS_TOKEN`, then continue.
+
+   - **If `FIGMA_ACCESS_TOKEN` is set:** call `GET /v1/me` to verify it is valid —
+     ```bash
+     curl "https://api.figma.com/v1/me" -H "X-Figma-Token: $FIGMA_ACCESS_TOKEN"
+     ```
+     If the response is not 200, stop and tell the user their token is invalid or expired — they need to generate a new one.
+
+   - **Scope check:** call `GET /v1/files/{file_key}/variables/local` to verify the token has `variables:read` scope —
+     ```bash
+     curl "https://api.figma.com/v1/files/{file_key}/variables/local" \
+       -H "X-Figma-Token: $FIGMA_ACCESS_TOKEN"
+     ```
+     If the response is 403, stop and tell the user to regenerate their token with `variables:read` scope added.
 
 2. **Load DS reference material**
 
    In parallel:
    - Fetch the Notion DS root page and navigate to relevant sections (foundations: colour, typography, spacing, layout; and any component pages relevant to what's in the frame)
-   - Fetch the RemotePass DS Figma file's component list to get canonical component names and structure:
+   - Fetch canonical component names from the RemotePass DS Figma file using a two-step lookup — avoids pulling 4,700+ icon results that bury UI components:
+
+     **Step 1** — fetch the file structure to identify the COMPONENTS page(s):
      ```bash
-     curl "https://api.figma.com/v1/files/68BjBAp23kbcFrNQ9bK6jP/components" \
+     curl "https://api.figma.com/v1/files/68BjBAp23kbcFrNQ9bK6jP?depth=1" \
        -H "X-Figma-Token: $FIGMA_ACCESS_TOKEN"
      ```
+     From the response, find pages whose name contains "Component" (case-insensitive). Collect their node IDs.
+
+     **Step 2** — fetch component nodes directly from those pages:
+     ```bash
+     curl "https://api.figma.com/v1/files/68BjBAp23kbcFrNQ9bK6jP/nodes?ids={components_page_ids}&depth=2" \
+       -H "X-Figma-Token: $FIGMA_ACCESS_TOKEN"
+     ```
+     Extract component names and structure from this targeted response only.
 
 3. **Extract IDs from the design frame URL**
    - File key: from the URL path segment after `/file/` or `/design/`
@@ -76,10 +107,12 @@ These are always referenced — do not ask the user for them:
    Extract from the response:
    - All frames and their names — identify breakpoint variants (desktop, mobile, tablet)
    - All component instances and their source component names
-   - Variable bindings on fills, strokes, spacing, and text styles — note any properties with raw hardcoded values instead of bound variables. When traversing children to extract variable bindings and detect hardcoded values, skip any node where `visible === false` entirely — do not descend into hidden layers.
+   - Variable bindings on fills, strokes, spacing, and text styles — note any properties with raw hardcoded values instead of bound variables
    - Layer names and nesting structure
    - Visible states, variants, and interaction labels
    - Text layer content for length variation assessment
+
+   Skip any node where `visible === false` — do not descend into hidden layers. This applies to all extraction above, including variable bindings and hardcoded value detection.
 
    Also fetch the Figma page metadata to check for a changelog:
    ```bash
@@ -95,6 +128,13 @@ These are always referenced — do not ask the user for them:
    - **Desktop** — frame present and complete
    - **Mobile** — frame present and complete
    - **Tablet** — optional; flag if the feature warrants it but is absent
+
+   ### Modes & themes
+   Dark mode is a theme variant, not a breakpoint — check it separately for every frame:
+   - **Light** — variant present and complete for each frame
+   - **Dark** — variant present and complete for each frame
+
+   Fail if either variant is absent for any frame. Do not treat dark mode as optional.
 
    ### Use cases
    Context-aware — infer from the feature what cases are expected, then verify each is designed:

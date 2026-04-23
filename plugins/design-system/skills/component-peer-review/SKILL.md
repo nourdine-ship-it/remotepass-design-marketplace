@@ -1,13 +1,13 @@
 ---
 title: Component Peer Review
 description: Peer review a DS component — inspect Figma structure via REST API, cross-check shadcn, Radix, and the RemotePass DS Notion docs, audit tokens and naming, review the component Notion documentation, then present findings
-version: 1.1.0
+version: 1.1.2
 requires: |
   - Figma component URL (required) — the component set to review
   - Notion documentation URL (required) — the component's doc page
   - FIGMA_ACCESS_TOKEN environment variable — for REST API access
   - Notion MCP connected — for reading Notion pages and optionally writing findings
-allowed-tools: WebFetch, Read, Bash, mcp__claude_ai_Notion__notion-fetch, mcp__claude_ai_Notion__notion-search, mcp__claude_ai_Notion__notion-update-page
+allowed-tools: WebFetch, Read, Bash, Edit, Write, mcp__claude_ai_Notion__notion-fetch, mcp__claude_ai_Notion__notion-search, mcp__claude_ai_Notion__notion-update-page
 argument-hint: "[figma-url] [notion-url]"
 ---
 
@@ -40,7 +40,7 @@ Catches issues that are invisible to the author — hardcoded values, naming tha
 
 - **Figma component URL** (required) — the component set to review
 - **Notion documentation URL** (required) — the component's doc page
-- **`FIGMA_ACCESS_TOKEN`** — set in environment with `files:read` and `variables:read` scopes only (no write or delete permissions). If missing, ask the user to set it.
+- **`FIGMA_ACCESS_TOKEN`** — set in environment with `files:read` and `variables:read` scopes only (no write or delete permissions). If missing, a friendly setup flow will guide you through saving it — you won't need to do this again. If present but invalid or missing the `variables:read` scope, the skill stops and tells you what to fix.
 - **Notion MCP** — must be configured to access the RemotePass workspace.
 
 ## Fixed resources
@@ -58,8 +58,27 @@ These are always referenced — do not ask the user for them:
    - **Figma component URL** — the component set to review
    - **Notion documentation URL** — the component's doc page
 
-   Then verify access:
-   - Confirm `FIGMA_ACCESS_TOKEN` is available in the environment. If not, ask the user to set it (`files:read` + `variables:read` scopes only).
+   Then verify token and connections:
+   - **If `FIGMA_ACCESS_TOKEN` is not set:** show the friendly collection flow —
+     > "Don't worry, Nourdine thought of this 👋 I need a Figma access token to read the file. Two options:
+     > **A** — Paste your token here and I'll save it automatically. You won't need to do this again. Note: the token must have `files:read` and `variables:read` scopes — no write or delete permissions.
+     > **B** — Save it yourself: open `~/.claude/settings.local.json` and add `"FIGMA_ACCESS_TOKEN": "your-token-here"` under the `"env"` key."
+
+     If the user chooses A: write the token to `~/.claude/settings.local.json` under `env.FIGMA_ACCESS_TOKEN`, then continue.
+
+   - **If `FIGMA_ACCESS_TOKEN` is set:** call `GET /v1/me` to verify it is valid —
+     ```bash
+     curl "https://api.figma.com/v1/me" -H "X-Figma-Token: $FIGMA_ACCESS_TOKEN"
+     ```
+     If the response is not 200, stop and tell the user their token is invalid or expired — they need to generate a new one.
+
+   - **Scope check:** call `GET /v1/files/{file_key}/variables/local` to verify the token has `variables:read` scope —
+     ```bash
+     curl "https://api.figma.com/v1/files/{file_key}/variables/local" \
+       -H "X-Figma-Token: $FIGMA_ACCESS_TOKEN"
+     ```
+     If the response is 403, stop and tell the user to regenerate their token with `variables:read` scope added.
+
    - Confirm Notion MCP is connected by making a lightweight call (`mcp__claude_ai_Notion__notion-fetch` with the page ID). If it fails, tell the user: "Notion MCP is not connected — please check your MCP configuration before running this skill."
 
    Do not proceed until both URLs are provided and both connections are confirmed.
@@ -120,6 +139,7 @@ These are always referenced — do not ask the user for them:
    Fetch the component's Notion page using `mcp__claude_ai_Notion__notion-fetch`. Also fetch the **Button** and **Checkbox** reference pages to compare structure and formatting.
 
    Review against the required page structure (in order):
+   0. **Preview image** — a visual reference image must appear at the very top of the page, before `## Description`. Flag as `[fix]` if absent.
    1. `## Description` — 1–2 sentences, no inline Figma link
    2. `## Changelog` — table: Date / Designer / Change
    3. `---`

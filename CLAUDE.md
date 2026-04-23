@@ -82,6 +82,17 @@ remotepass-design-marketplace/
 
 ---
 
+## Figma MCP vs. FIGMA_ACCESS_TOKEN
+
+Two separate auth mechanisms — both are needed:
+
+- **Figma MCP tools** (`mcp__figma-mcp-server__*`) handle structural reads through their own authentication. Use them for node structure, component lists, and file browsing.
+- **`FIGMA_ACCESS_TOKEN`** is a personal REST API token set as an environment variable. Required for any call that MCP does not expose — specifically `boundVariables` per layer, which is needed for DS compliance checks (token audit, hardcoded value detection). Without this token, DS compliance cannot be verified.
+
+All skills that perform DS compliance checks (`/readiness`, `/component-documentation`, `/component-peer-review`) require both. `/qa` and `/copy` require only `FIGMA_ACCESS_TOKEN` for REST access to layer data.
+
+---
+
 ## Versioning
 
 Any change to a plugin, skill, hook, or marketplace file must be followed by a version bump:

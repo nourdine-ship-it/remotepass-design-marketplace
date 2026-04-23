@@ -5,23 +5,23 @@
     "email": "nourdine@remotepass.com"
   },
   "metadata": {
-    "description": "Claude Code plugins for the RemotePass design team — design review, handoff readiness, component documentation, and peer review",
-    "version": "1.2.0"
+    "description": "Claude Code plugins for the RemotePass design team — design review, UX copy review, handoff readiness, component documentation, and peer review",
+    "version": "1.3.0"
   },
   "plugins": [
     {
       "name": "design-review",
-      "description": "Structured design critique across 5 UX dimensions including copy and tone",
+      "description": "Design critique across 4 UX dimensions, plus dedicated UX copy review",
       "source": "./plugins/design-review",
-      "version": "1.2.0",
+      "version": "1.3.1",
       "author": { "name": "Nourdine", "email": "nourdine@remotepass.com" },
-      "keywords": ["design-review", "critique", "review", "ux", "feedback", "heuristics"]
+      "keywords": ["design-review", "critique", "review", "ux", "feedback", "heuristics", "copy"]
     },
     {
       "name": "design-handoff",
-      "description": "Pre-handoff readiness checklist — breakpoints, use cases, system states, DS compliance, changelog",
+      "description": "Pre-handoff readiness checklist — breakpoints, modes & themes, use cases, system states, DS compliance, changelog",
       "source": "./plugins/design-handoff",
-      "version": "1.1.0",
+      "version": "1.1.4",
       "author": { "name": "Nourdine", "email": "nourdine@remotepass.com" },
       "keywords": ["handoff", "readiness", "dev-handoff", "checklist", "breakpoints", "ds-compliance"]
     },
@@ -29,7 +29,7 @@
       "name": "design-system",
       "description": "Component documentation and peer review for the RemotePass design system",
       "source": "./plugins/design-system",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "author": { "name": "Nourdine", "email": "nourdine@remotepass.com" },
       "keywords": ["design-system", "components", "documentation", "tokens", "figma", "notion"]
     }
