@@ -60,6 +60,63 @@ if [[ "$answer" =~ ^[Yy]$ ]]; then
   fi
 fi
 
+# Register hooks from each plugin into ~/.claude/settings.json
+SETTINGS="$HOME/.claude/settings.json"
+echo "Registering plugin hooks into $SETTINGS ..."
+echo ""
+
+python3 - "$REPO_DIR" "$SETTINGS" << 'PYEOF'
+import json, os, sys
+
+repo_dir = sys.argv[1]
+settings_path = sys.argv[2]
+
+try:
+    with open(settings_path) as f:
+        settings = json.load(f)
+except (FileNotFoundError, json.JSONDecodeError):
+    settings = {}
+
+# Remove previously installed marketplace hooks (identified by repo_dir in command path)
+existing = settings.get("hooks", {})
+for event in list(existing.keys()):
+    existing[event] = [
+        e for e in existing[event]
+        if not any(repo_dir in h.get("command", "") for h in e.get("hooks", []))
+    ]
+settings["hooks"] = existing
+
+# Walk plugins and merge hooks
+plugins_dir = os.path.join(repo_dir, "plugins")
+count = 0
+for plugin_name in sorted(os.listdir(plugins_dir)):
+    plugin_dir = os.path.join(plugins_dir, plugin_name)
+    hooks_json = os.path.join(plugin_dir, "hooks", "hooks.json")
+    if not os.path.isfile(hooks_json):
+        continue
+
+    with open(hooks_json) as f:
+        plugin_hooks = json.load(f)
+
+    for event, entries in plugin_hooks.get("hooks", {}).items():
+        if event not in settings["hooks"]:
+            settings["hooks"][event] = []
+        for entry in entries:
+            resolved = []
+            for h in entry.get("hooks", []):
+                cmd = h["command"].replace("${CLAUDE_PLUGIN_ROOT}", plugin_dir)
+                resolved.append({**h, "command": cmd})
+            settings["hooks"][event].append({**entry, "hooks": resolved})
+            count += 1
+    print(f"  + {plugin_name} ({len(plugin_hooks.get('hooks', {}))} event(s))")
+
+with open(settings_path, "w") as f:
+    json.dump(settings, f, indent=2)
+    f.write("\n")
+
+print(f"\n{count} hook rule(s) registered into {settings_path}")
+PYEOF
+
 echo ""
 echo "Done. Open Claude Code and type / to see your skills."
 echo ""
