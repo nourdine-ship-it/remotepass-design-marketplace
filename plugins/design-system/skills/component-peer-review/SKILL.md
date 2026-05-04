@@ -40,7 +40,7 @@ Catches issues that are invisible to the author — hardcoded values, naming tha
 
 - **Figma component URL** (required) — the component set to review
 - **Notion documentation URL** (required) — the component's doc page
-- **`FIGMA_ACCESS_TOKEN`** — set in environment with `files:read` and `variables:read` scopes only (no write or delete permissions). If missing, a friendly setup flow will guide you through saving it — you won't need to do this again. If present but invalid or missing the `variables:read` scope, the skill stops and tells you what to fix.
+- **`FIGMA_ACCESS_TOKEN`** — set in environment with `files:read` scope only (no write or delete permissions). If missing, a friendly setup flow will guide you through saving it — you won't need to do this again. If present but invalid, the skill stops and tells you what to fix.
 - **Notion MCP** — must be configured to access the RemotePass workspace.
 
 ## Fixed resources
@@ -61,7 +61,7 @@ These are always referenced — do not ask the user for them:
    Then verify token and connections:
    - **If `FIGMA_ACCESS_TOKEN` is not set:** show the friendly collection flow —
      > "Don't worry, Nourdine thought of this 👋 I need a Figma access token to read the file. Two options:
-     > **A** — Paste your token here and I'll save it automatically. You won't need to do this again. Note: the token must have `files:read` and `variables:read` scopes — no write or delete permissions.
+     > **A** — Paste your token here and I'll save it automatically. You won't need to do this again. Note: the token must have `files:read` scope — no write or delete permissions.
      > **B** — Save it yourself: open `~/.claude/settings.local.json` and add `"FIGMA_ACCESS_TOKEN": "your-token-here"` under the `"env"` key."
 
      If the user chooses A: write the token to `~/.claude/settings.local.json` under `env.FIGMA_ACCESS_TOKEN`, then continue.
@@ -71,13 +71,6 @@ These are always referenced — do not ask the user for them:
      curl "https://api.figma.com/v1/me" -H "X-Figma-Token: $FIGMA_ACCESS_TOKEN"
      ```
      If the response is not 200, stop and tell the user their token is invalid or expired — they need to generate a new one.
-
-   - **Scope check:** call `GET /v1/files/{file_key}/variables/local` to verify the token has `variables:read` scope —
-     ```bash
-     curl "https://api.figma.com/v1/files/{file_key}/variables/local" \
-       -H "X-Figma-Token: $FIGMA_ACCESS_TOKEN"
-     ```
-     If the response is 403, stop and tell the user to regenerate their token with `variables:read` scope added.
 
    - Confirm Notion MCP is connected by making a lightweight call (`mcp__claude_ai_Notion__notion-fetch` with the page ID). If it fails, tell the user: "Notion MCP is not connected — please check your MCP configuration before running this skill."
 
@@ -116,6 +109,7 @@ These are always referenced — do not ask the user for them:
    - `boundVariables` with an empty string value (`""`) means the variable ID wasn't captured — not confirmation of a hardcoded value. Cross-check the actual pixel value before flagging.
    - `boundVariables` on the component SET level does not reflect what's inside each variant — do a second pass on individual variant children if needed.
    - `cornerRadius: 0` and `rectangleCornerRadii: [0,0,0,0]` with no binding are **not violations** — zero is the default.
+   - Corner radius bindings are stored in `boundVariables` under `rectangleCornerRadii`, not `cornerRadius`. Always check for `rectangleCornerRadii` — checking for `cornerRadius` will produce false positives on properly bound layers.
    - Only flag non-zero fills, spacings, or radii with no variable binding.
    - **External library tokens** have a long hash prefix before `/` (e.g. `VariableID:2348e5af.../1699:241`). **Local tokens** are short numeric (e.g. `VariableID:132:42`). Flag external tokens separately — do not treat them as violations.
 

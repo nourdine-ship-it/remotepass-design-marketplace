@@ -4,7 +4,7 @@ description: Pre-handoff checklist — verifies breakpoints, modes & themes, use
 version: 1.0.4
 requires: |
   - Figma frame URL (required)
-  - FIGMA_ACCESS_TOKEN (required for private files — set as env var with files:read and variables:read scopes)
+  - FIGMA_ACCESS_TOKEN (required for private files — set as env var with files:read scope)
   - Notion MCP (required — for reading RemotePass DS documentation)
 allowed-tools: WebFetch, Bash, Edit, Write, mcp__claude_ai_Notion__notion-fetch, mcp__claude_ai_Notion__notion-search
 argument-hint: "[figma-url]"
@@ -36,7 +36,7 @@ Designs that move to dev incomplete create rework. This skill catches missing st
 ## What is needed?
 
 - **Figma frame URL** — the specific frame, section, or flow to check
-- **`FIGMA_ACCESS_TOKEN`** — required for private files. Set in environment with `files:read` and `variables:read` scopes only (no write or delete permissions). If missing, a friendly setup flow will guide you through saving it — you won't need to do this again. If present but invalid or missing the `variables:read` scope, the skill stops and tells you what to fix.
+- **`FIGMA_ACCESS_TOKEN`** — required for private files. Set in environment with `files:read` scope only (no write or delete permissions). If missing, a friendly setup flow will guide you through saving it — you won't need to do this again. If present but invalid, the skill stops and tells you what to fix.
 - **Notion MCP** — must be configured to access the RemotePass workspace. Used to read DS component documentation and foundations (colour, typography, spacing, layout).
 
 ## Fixed resources
@@ -65,13 +65,6 @@ These are always referenced — do not ask the user for them:
      curl "https://api.figma.com/v1/me" -H "X-Figma-Token: $FIGMA_ACCESS_TOKEN"
      ```
      If the response is not 200, stop and tell the user their token is invalid or expired — they need to generate a new one.
-
-   - **Scope check:** call `GET /v1/files/{file_key}/variables/local` to verify the token has `variables:read` scope —
-     ```bash
-     curl "https://api.figma.com/v1/files/{file_key}/variables/local" \
-       -H "X-Figma-Token: $FIGMA_ACCESS_TOKEN"
-     ```
-     If the response is 403, stop and tell the user to regenerate their token with `variables:read` scope added.
 
 2. **Load DS reference material**
 
@@ -168,6 +161,7 @@ These are always referenced — do not ask the user for them:
    ### DS compliance
    - All component instances match their canonical counterpart in the RemotePass DS Figma library
    - All fills, strokes, spacing values, and text styles are bound to DS variables and tokens — no hardcoded values
+   - Corner radius bindings are stored in `boundVariables` under `rectangleCornerRadii`, not `cornerRadius`. Always check for `rectangleCornerRadii` — checking for `cornerRadius` will produce false positives on properly bound layers.
    - When checking for hardcoded fills, apply the following exclusions:
      - **Hidden layers** — skip any node where `visible === false`. Do not report hardcoded fills on hidden layers or their children.
      - **Flag icon components** — skip `INSTANCE` nodes whose name matches flag icon patterns (e.g. country flags such as `flag-us`, `flag-gb`, `Flag / US`, `Flag / GB`). These use locale-specific colors by design. Do not flag hardcoded fills on these instances or their children.
