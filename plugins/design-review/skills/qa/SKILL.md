@@ -1,7 +1,7 @@
 ---
 title: Design Review
 description: Structured critique across 4 UX dimensions — extracts Figma layer data, delivers actionable feedback sorted by severity
-version: 1.5.2
+version: 1.5.3
 requires: |
   - Figma frame URL (required)
   - FIGMA_ACCESS_TOKEN (required for private files — set as env var with files:read scope)
@@ -84,13 +84,46 @@ Critique without a shared framework produces vague, inconsistent feedback. Readi
 
 5. **Output findings sorted by severity**
 
-   Group all issues across all dimensions into:
-   - **Critical** — blocks use, causes confusion, or would fail a usability test
-   - **High** — creates friction, mismatches expectations, or violates product patterns
-   - **Medium** — noticeable issues to fix before sharing with the team
-   - **Low** — polish, minor inconsistencies, or nice-to-haves
+   Output one table per dimension. Within each dimension, list issues in the table then follow with 1–2 brief ✅ lines for notable things that are done well. If a dimension has no issues, show only the ✅ lines. Always include at least one ✅ line per dimension — never leave a dimension entirely silent.
 
-   For each issue: tag the dimension, state the observation referencing the exact layer name, text string, or component, and give one concrete fix.
+   For each finding: reference the exact layer name, text string, or component. Give one concrete fix.
 
-   After all findings, always close with:
-   > "Make your review complete — run /copy on this frame to check UX writing. Or don't, and risk shipping 'Cart' spelled as 'Fart'."
+   ```
+   ## Design Review — [Frame name]
+
+   **Clarity**
+   | Severity | Finding | Fix |
+   |----------|---------|-----|
+   | 🔴 Critical | [specific finding] | [concrete fix] |
+   | 🟠 High | [specific finding] | [concrete fix] |
+
+   ✅ [Notable thing done well.]
+
+   ---
+
+   **Hierarchy**
+   | Severity | Finding | Fix |
+   |----------|---------|-----|
+   | 🟡 Medium | [specific finding] | [concrete fix] |
+
+   ✅ [Notable thing done well.]
+
+   ---
+
+   **Friction**
+   ✅ [No major friction — one specific positive observation.]
+
+   ---
+
+   **Consistency**
+   | Severity | Finding | Fix |
+   |----------|---------|-----|
+   | ⚪ Low | [specific finding] | [concrete fix] |
+
+   ✅ [Notable thing done well.]
+   ```
+
+   Severity: 🔴 Critical = blocks use · 🟠 High = creates friction · 🟡 Medium = noticeable · ⚪ Low = polish
+
+   Always close with:
+   > ⚠️ Make your review complete — run /copy on this frame to check UX writing. Or don't, and risk shipping 'Cart' spelled as 'Fart'.

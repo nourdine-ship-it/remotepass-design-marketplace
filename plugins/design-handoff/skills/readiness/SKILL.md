@@ -1,7 +1,7 @@
 ---
 title: Handoff Readiness
 description: Pre-handoff checklist — verifies breakpoints, modes & themes, use cases, system states, DS compliance, and changelog before a design moves to dev
-version: 1.0.4
+version: 1.0.5
 requires: |
   - Figma frame URL (required)
   - FIGMA_ACCESS_TOKEN (required for private files — set as env var with files:read scope)
@@ -177,8 +177,30 @@ These are always referenced — do not ask the user for them:
 
 6. **Output**
 
-   Deliver one Pass/Fail table per category. For each Fail, state the specific gap and what needs to be added or fixed before handoff. Naming & layer hygiene findings are listed separately as advisory — they do not affect the overall Pass/Fail result.
+   Deliver a single status table covering all required categories, with the specific gap stated inline for any Fail. Naming & layer hygiene findings are listed separately as advisory — they do not affect the overall verdict.
 
-   End with an overall verdict:
-   - **Ready** — all required categories pass
-   - **Not ready** — one or more required categories fail, list what's blocking
+   ```
+   ## Handoff Readiness — [Frame name]
+
+   | Category | Status | Gap |
+   |----------|--------|-----|
+   | Breakpoints | ✅ Pass | — |
+   | Modes & themes | ❌ Fail | [specific gap] |
+   | Use cases | ❌ Fail | [specific gap] |
+   | System states | ✅ Pass | — |
+   | Text length variations | ✅ Pass | — |
+   | DS compliance | ❌ Fail | [specific gap — layer, property, value] |
+   | Changelog | ✅ Pass | — |
+
+   **Naming & layer hygiene** *(advisory — non-blocking)*
+   | Finding |
+   |---------|
+   | [specific layer or hygiene issue] |
+
+   ✅ No naming or hygiene issues.
+
+   ---
+
+   **Verdict: ✅ Ready** — all categories pass.
+   **Verdict: ❌ Not ready** — blocking: [Category] · [Category] · [Category]
+   ```

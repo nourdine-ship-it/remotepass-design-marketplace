@@ -1,7 +1,7 @@
 ---
 title: Component Peer Review
 description: Peer review a DS component — inspect Figma structure via REST API, cross-check shadcn, Radix, and the RemotePass DS Notion docs, audit tokens and naming, review the component Notion documentation, then present findings
-version: 1.1.2
+version: 1.1.3
 requires: |
   - Figma component URL (required) — the component set to review
   - Notion documentation URL (required) — the component's doc page
@@ -115,7 +115,7 @@ These are always referenced — do not ask the user for them:
 
 5. **Figma review** — produce numbered findings for:
    - **Structure** — does it match shadcn's sub-component model? Are slots used correctly? Any redundant variants that could be a boolean (or vice versa)?
-   - **Naming** — compare every property name, variant value, and slot name against DS conventions from step 3. State the exact rename for each flag. Do NOT flag `#id` suffixes (e.g. `Root#4900:0`) unless they cause a real conflict.
+   - **Naming** — compare every property name, variant value, and slot name against DS conventions from step 3. State the exact rename for each flag. Do NOT flag `#id` suffixes (e.g. `Root#4900:0`) unless they cause a real conflict. Size variant values must always be lowercase (`default`, `comfortable`, `lg`, `sm`, `xs`) — flag any non-lowercase casing (e.g. `"Default"`, `"LG"`) with the exact rename.
    - **Tokens** — apply accuracy rules from step 4. Only flag verified non-zero unbound values; list the actual pixel value next to each (e.g. `gap: 8px — no token binding`). Flag external library tokens separately.
    - **Scalability** — missing states present in shadcn, properties that will be hard to maintain, anything an engineer can't map cleanly to code.
 
@@ -128,6 +128,11 @@ These are always referenced — do not ask the user for them:
    - A spacing, padding, or gap value has a raw pixel value instead of a bound spacing token
    - A text layer uses a raw font size, weight, or line-height instead of a bound text style
 
+   **Accuracy rules — apply before flagging:**
+   - `boundVariables` with an empty string value (`""`) means the variable ID wasn't captured — not a hardcoded value. Cross-check the actual pixel value before flagging.
+   - Corner radius: bindings are stored in `boundVariables` under `rectangleCornerRadii`, not `cornerRadius`. A layer with a non-zero `cornerRadius` value may still be correctly bound — always check `rectangleCornerRadii` first. Checking `cornerRadius` alone will produce false positives on properly bound layers.
+   - `cornerRadius: 0` and `rectangleCornerRadii: [0,0,0,0]` with no binding are not violations — zero is the default.
+
 7. **Fetch and review the Notion documentation**
 
    Fetch the component's Notion page using `mcp__claude_ai_Notion__notion-fetch`. Also fetch the **Button** and **Checkbox** reference pages to compare structure and formatting.
@@ -135,7 +140,7 @@ These are always referenced — do not ask the user for them:
    Review against the required page structure (in order):
    0. **Preview image** — a visual reference image must appear at the very top of the page, before `## Description`. Flag as `[fix]` if absent.
    1. `## Description` — 1–2 sentences, no inline Figma link
-   2. `## Changelog` — table: Date / Designer / Change
+   2. `## Changelog` — table: Date / Designer / Change. Dates must use MM/DD/YYYY format — flag any other format as ⚪ Minor.
    3. `---`
    4. `## References` — shadcn link + Radix primitive link (or "no primitive" note). Fetch each URL to confirm it resolves before flagging it as broken.
    5. `---`
@@ -151,29 +156,42 @@ These are always referenced — do not ask the user for them:
 
 8. **Present the full review report**
 
+   Write findings as a designer explaining things to another designer — plain language, no jargon. Each section gets a markdown table when there are findings. Always include the ✅ line when a section is clean — never omit it silently.
+
    ```
    ## Peer Review — [Component Name]
 
    ### Figma
 
    **Structure**
-   1. [fix/improve/minor] [specific issue] → [exact action]
+   | Severity | Finding | Action |
+   |----------|---------|--------|
+   | 🔴 Fix | [specific issue] | [exact action] |
+   | 🟡 Improve | [specific issue] | [exact action] |
    ✅ Structure — no issues.
 
    **Naming**
-   1. [fix] Rename `"OldName"` → `"NewName"` — [reason]
+   | Severity | Finding | Action |
+   |----------|---------|--------|
+   | 🔴 Fix | Rename `"OldName"` to `"NewName"` | [reason in plain language] |
    ✅ Naming — no issues.
 
    **Tokens**
-   1. [fix] `[layer name]`: [property] = [actual pixel value], no token binding → bind to `[token]`
-   ✅ No external library tokens.
+   | Severity | Finding | Action |
+   |----------|---------|--------|
+   | 🔴 Fix | `[layer name]`: [property] is [actual pixel value] with no token | Bind to `[token]` |
+   ✅ No hardcoded values. ✅ No external library tokens.
 
    **Scalability**
-   1. [improve] Missing `[State]` variant — present in shadcn, will likely be needed
+   | Severity | Finding | Action |
+   |----------|---------|--------|
+   | 🟡 Improve | Missing `[State]` variant — present in shadcn | Add before marking ready for dev |
    ✅ Scalability — no concerns.
 
    **DS Compliance**
-   1. [fix] `[layer name]`: fill = #1A1A1A, no token binding → bind to `[colour token]`
+   | Severity | Finding | Action |
+   |----------|---------|--------|
+   | 🔴 Fix | `[layer name]`: fill is #1A1A1A with no token | Bind to `[colour token]` |
    ✅ DS Compliance — all values bound to tokens.
 
    ---
@@ -181,25 +199,31 @@ These are always referenced — do not ask the user for them:
    ### Notion Documentation
 
    **Structure**
-   1. [fix] Missing `## [Section]` section
+   | Severity | Finding | Action |
+   |----------|---------|--------|
+   | 🔴 Fix | Missing `## [Section]` section | Add the section |
    ✅ Structure — no issues.
 
    **Accuracy**
-   1. [fix] Variants & Properties table lists `"[wrong name]"` — actual Figma prop is `"[correct name]"`
+   | Severity | Finding | Action |
+   |----------|---------|--------|
+   | 🔴 Fix | Variants & Properties table says `"[wrong name]"` — the actual Figma property is `"[correct name]"` | Update to match |
    ✅ Accuracy — no issues.
 
    **References**
-   1. [fix] shadcn link points to [wrong component] → should be [correct URL]
+   | Severity | Finding | Action |
+   |----------|---------|--------|
+   | 🔴 Fix | shadcn link goes to [wrong component] | Update to [correct URL] |
    ✅ References — no issues.
 
    **Formatting**
-   1. [minor] `## Do's & Don'ts` uses interleaved callouts instead of two-column layout → restructure
+   | Severity | Finding | Action |
+   |----------|---------|--------|
+   | ⚪ Minor | Do's & Don'ts uses interleaved callouts instead of two columns | Restructure with `<columns>` |
    ✅ Formatting — no issues.
    ```
 
-   Severity: `[fix]` = blocking · `[improve]` = should fix · `[minor]` = cosmetic
-
-   If a section is clean, always write `✅ [Section name] — no issues.` — never omit it silently.
+   Severity: 🔴 Fix = blocking · 🟡 Improve = should fix · ⚪ Minor = cosmetic
 
 9. **Offer to write findings to Notion**
 

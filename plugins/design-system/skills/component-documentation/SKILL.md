@@ -1,7 +1,7 @@
 ---
 title: Component Documentation
 description: Full workflow — inspect a Figma component via REST API, cross-check shadcn, confirm findings, then write structured documentation to a Notion page
-version: 1.2.1
+version: 1.2.2
 requires: |
   - Figma component URL (required) — the component set to document
   - Notion page URL (required) — an empty page the user has already created for this component
@@ -122,12 +122,41 @@ Documentation written without inspecting the actual Figma data drifts from reali
 
    Review for:
    - **Token hygiene** — hardcoded values or missing token bindings
-   - **Naming** — property names that don't follow DS conventions (PascalCase, `Show X` booleans, `Default/Hover/Focus/Disabled` states)
+   - **Naming** — property names that don't follow DS conventions (PascalCase, `Show X` booleans, `Default/Hover/Focus/Disabled` states, size values always lowercase: `default`, `comfortable`, `lg`, `sm`, `xs`)
    - **Missing states** — states present in shadcn but absent in Figma
    - **Structural gaps** — sub-components or composition patterns from shadcn that are missing
    - **Redundant variants** — overlapping or simplifiable variants
 
-   Format as a numbered list with bold category labels. Note priority per item.
+   For each category, use a table for issues and a ✅ line for what's clean. If a category has no issues, show only the ✅ line.
+
+   ```
+   ## Figma improvements — [Component name]
+
+   **Token hygiene**
+   | Priority | Finding | Suggestion |
+   |----------|---------|------------|
+   | 🔴 Fix | `[layer]`: [property] is [value] with no token | Bind to `[token]` |
+
+   ✅ [What's clean — e.g. "All fill colours are bound to tokens."]
+
+   **Naming**
+   | Priority | Finding | Suggestion |
+   |----------|---------|------------|
+   | 🟡 Improve | [property] uses `"[wrong value]"` | Rename to `"[correct value]"` |
+
+   ✅ [What's clean.]
+
+   **Missing states**
+   ✅ All shadcn states present — Default, Hover, Focus, Disabled.
+
+   **Structural gaps**
+   ✅ Sub-component structure matches shadcn.
+
+   **Redundant variants**
+   ✅ No redundant or overlapping variants.
+   ```
+
+   Priority: 🔴 Fix = blocking · 🟡 Improve = should fix · ⚪ Minor = cosmetic
 
    Wait for the designer to acknowledge before proceeding to Notion.
 
@@ -151,7 +180,7 @@ Documentation written without inspecting the actual Figma data drifts from reali
    **Page structure (in this exact order):**
 
    1. `## Description` — 1–2 sentences describing the component. No inline Figma link.
-   2. `## Changelog` — table: Date / Designer / Change. Today's date, designer = Nourdine, change = "Initial documentation — [summary of variants and states]. Shadcn/ui alignment." For custom components: "Custom component, no shadcn alignment."
+   2. `## Changelog` — table: Date / Designer / Change. Today's date in MM/DD/YYYY format, designer = Nourdine, change = "Initial documentation — [summary of variants and states]. Shadcn/ui alignment." For custom components: "Custom component, no shadcn alignment."
    3. `---`
    4. `## References` — shadcn/ui source link (`https://ui.shadcn.com/docs/components/{component-name}`) + Radix UI link (`https://www.radix-ui.com/primitives/docs/components/{component-name}`). If no Radix component: "No Radix UI component — shadcn [Component] is a pure styled component (HTML only)." For custom: "No shadcn/ui component — [Component] is a custom RemotePass component with no shadcn or Radix UI counterpart."
    5. `---`

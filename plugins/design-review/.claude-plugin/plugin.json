@@ -1,6 +1,6 @@
 {
   "name": "design-review",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "Design critique across 4 UX dimensions, plus dedicated UX copy review",
   "author": { "name": "Nourdine", "email": "nourdine@remotepass.com" },
   "repository": "https://github.com/nourdine-ship-it/remotepass-design-marketplace",
