@@ -1,5 +1,5 @@
 ---
-title: Design Review
+title: QA
 description: Structured critique across 4 UX dimensions — extracts Figma layer data, delivers actionable feedback sorted by severity
 version: 1.6.0
 requires: |
