@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Claude Code plugins for the RemotePass design team — design review, UX copy review, handoff readiness, component documentation, and peer review",
-    "version": "1.4.0"
+    "version": "1.5.0"
   },
   "plugins": [
     {
@@ -27,9 +27,9 @@
     },
     {
       "name": "design-review",
-      "description": "Design critique across 4 UX dimensions, plus dedicated UX copy review",
+      "description": "Design critique across 4 UX dimensions plus team decisions check, and dedicated UX copy review",
       "source": "./plugins/design-review",
-      "version": "1.3.3",
+      "version": "1.4.0",
       "author": { "name": "Nourdine", "email": "nourdine@remotepass.com" },
       "keywords": ["design-review", "critique", "review", "ux", "feedback", "heuristics", "copy"]
     },

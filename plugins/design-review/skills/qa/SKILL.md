@@ -1,11 +1,12 @@
 ---
 title: Design Review
 description: Structured critique across 4 UX dimensions — extracts Figma layer data, delivers actionable feedback sorted by severity
-version: 1.5.3
+version: 1.6.0
 requires: |
   - Figma frame URL (required)
   - FIGMA_ACCESS_TOKEN (required for private files — set as env var with files:read scope)
-allowed-tools: WebFetch, Bash, Edit, Write
+  - Notion MCP (required for team decisions check — must be configured to access the RemotePass workspace)
+allowed-tools: WebFetch, Bash, Edit, Write, mcp__claude_ai_Notion__notion-fetch
 argument-hint: "[figma-url]"
 ---
 
@@ -82,7 +83,24 @@ Critique without a shared framework produces vague, inconsistent feedback. Readi
    - **Friction** — Where might a user hesitate, get confused, or drop off? Unnecessary steps or unclear inputs?
    - **Consistency** — Are patterns and interactions coherent with the rest of the product?
 
-5. **Output findings sorted by severity**
+5. **Check against team design decisions**
+
+   Fetch the full Design Decisions database:
+
+   ```
+   mcp__claude_ai_Notion__notion-fetch
+     id: "collection://2addba54-3988-4a1e-bed0-c191b566018c"
+   ```
+
+   Keep only `Status == "Active"` rows. For each active row:
+   - Read `Applies when`. If set and it doesn't match the frame's subject or its child layers → skip silently. If empty → treat as universally applicable.
+   - If it applies, check whether the design follows the rule and flag any mismatch.
+
+   Frame subject: use the same structural approach as the layer read — overlay+elevated component → floating element → isolated component → full page.
+
+   If Notion is unreachable or the fetch fails, skip the Team Decisions section and note it in the output.
+
+6. **Output findings sorted by severity**
 
    Output one table per dimension. Within each dimension, list issues in the table then follow with 1–2 brief ✅ lines for notable things that are done well. If a dimension has no issues, show only the ✅ lines. Always include at least one ✅ line per dimension — never leave a dimension entirely silent.
 
@@ -124,6 +142,27 @@ Critique without a shared framework produces vague, inconsistent feedback. Readi
    ```
 
    Severity: 🔴 Critical = blocks use · 🟠 High = creates friction · 🟡 Medium = noticeable · ⚪ Low = polish
+
+   After the four dimensions, add a fifth section for team decisions:
+
+   ```
+   ---
+
+   **Team Decisions**
+   | Severity | Rule | Finding | Fix |
+   |----------|------|---------|-----|
+   | 🟠 High | [Title] · [Category] | [specific finding] | [concrete fix] |
+
+   ✅ [Notable thing done well, or "N decisions checked — all followed."]
+   ```
+
+   If no active decisions apply to the frame:
+   > ✅ No active team decisions apply to this frame.
+
+   If Notion was unreachable:
+   > ⚠️ Couldn't reach the Design Decisions database — this section was skipped.
+
+   Severity for team decision mismatches defaults to 🟠 High (explicit team rule broken) — adjust up to 🔴 if the mismatch blocks use, or down to 🟡/⚪ if it's genuinely minor.
 
    Always close with:
    > ⚠️ Make your review complete — run /copy on this frame to check UX writing. Or don't, and risk shipping 'Cart' spelled as 'Fart'.

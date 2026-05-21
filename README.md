@@ -99,7 +99,7 @@ remotepass-design-marketplace/
 ### 🔍 Design Review
 | Skill | What it does | Example trigger |
 |---|---|---|
-| `/qa` | Structured critique across 4 UX dimensions — extracts Figma layer data, delivers actionable feedback sorted by severity | "Review this design before I share it with the team" |
+| `/qa` | Structured critique across 4 UX dimensions plus a check against the team's active design decisions — extracts Figma layer data, delivers actionable feedback sorted by severity | "Review this design before I share it with the team" |
 | `/copy` | UX writing review against RemotePass UX Writing Guidelines — extracts text layers, applies rule IDs by element type, delivers findings with corrected versions | "Review the copy on this screen" |
 
 ### 📋 Design Handoff
