@@ -10,22 +10,6 @@
   },
   "plugins": [
     {
-      "name": "design-review",
-      "description": "Design critique across 4 UX dimensions, plus dedicated UX copy review",
-      "source": "./plugins/design-review",
-      "version": "1.3.3",
-      "author": { "name": "Nourdine", "email": "nourdine@remotepass.com" },
-      "keywords": ["design-review", "critique", "review", "ux", "feedback", "heuristics", "copy"]
-    },
-    {
-      "name": "design-handoff",
-      "description": "Pre-handoff readiness checklist — breakpoints, modes & themes, use cases, system states, DS compliance, changelog",
-      "source": "./plugins/design-handoff",
-      "version": "1.1.5",
-      "author": { "name": "Nourdine", "email": "nourdine@remotepass.com" },
-      "keywords": ["handoff", "readiness", "dev-handoff", "checklist", "breakpoints", "ds-compliance"]
-    },
-    {
       "name": "design-system",
       "description": "Component documentation and peer review for the RemotePass design system",
       "source": "./plugins/design-system",
@@ -40,6 +24,22 @@
       "version": "1.0.0",
       "author": { "name": "Moustapha", "email": "moustapha@remotepass.com" },
       "keywords": ["design-prep", "pre-design", "planning", "design-decisions", "consistency", "figma", "notion"]
+    },
+    {
+      "name": "design-review",
+      "description": "Design critique across 4 UX dimensions, plus dedicated UX copy review",
+      "source": "./plugins/design-review",
+      "version": "1.3.3",
+      "author": { "name": "Nourdine", "email": "nourdine@remotepass.com" },
+      "keywords": ["design-review", "critique", "review", "ux", "feedback", "heuristics", "copy"]
+    },
+    {
+      "name": "design-handoff",
+      "description": "Pre-handoff readiness checklist — breakpoints, modes & themes, use cases, system states, DS compliance, changelog",
+      "source": "./plugins/design-handoff",
+      "version": "1.1.5",
+      "author": { "name": "Nourdine", "email": "nourdine@remotepass.com" },
+      "keywords": ["handoff", "readiness", "dev-handoff", "checklist", "breakpoints", "ds-compliance"]
     }
   ]
 }

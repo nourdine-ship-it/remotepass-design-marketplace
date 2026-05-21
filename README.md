@@ -8,9 +8,10 @@ Claude Code plugins for the RemotePass design team. Install once — all skills 
 
 | Plugin | Skills |
 |---|---|
+| Design System | `/component-documentation` · `/component-peer-review` |
+| Design Prep | `/design-decisions` |
 | Design Review | `/qa` · `/copy` |
 | Design Handoff | `/readiness` |
-| Design System | `/component-documentation` · `/component-peer-review` |
 
 Type `/` in Claude Code to see all available skills and trigger them with natural language.
 
@@ -31,9 +32,10 @@ Open Claude Code and run:
 Still inside Claude Code, install each plugin:
 
 ```
+/plugin install design-system@remotepass-design-marketplace
+/plugin install design-prep@remotepass-design-marketplace
 /plugin install design-review@remotepass-design-marketplace
 /plugin install design-handoff@remotepass-design-marketplace
-/plugin install design-system@remotepass-design-marketplace
 ```
 
 That's it — all skills are now available. Type `/` to see them.
@@ -62,7 +64,7 @@ remotepass-design-marketplace/
 │   └── marketplace.json          # Marketplace metadata & plugin registry
 ├── plugins/
 │   ├── SKILL_TEMPLATE.md         # Template for creating new skills
-│   └── [plugin-name]/            # One folder per plugin (design-review, design-handoff, design-system)
+│   └── [plugin-name]/            # One folder per plugin (design-system, design-prep, design-review, design-handoff)
 │       ├── .claude-plugin/
 │       │   └── plugin.json       # Plugin metadata, name, version
 │       ├── hooks/
@@ -83,6 +85,17 @@ remotepass-design-marketplace/
 
 ## Skills reference
 
+### 🧱 Design System
+| Skill | What it does | Example trigger |
+|---|---|---|
+| `/component-documentation` | Full DS documentation — anatomy, variants, usage, accessibility | "Document the Checkbox component for the design system" |
+| `/component-peer-review` | Peer review DS docs — gaps, clarity, verdict + top 3 fixes | "Review these component docs before I post them to Notion" |
+
+### 🗂 Design Prep
+| Skill | What it does | Example trigger |
+|---|---|---|
+| `/design-decisions` | Look up the team's shared design decisions for a topic, optionally audit a Figma frame or screenshot against them, and log new decisions to Notion | "What do we do for empty states?" |
+
 ### 🔍 Design Review
 | Skill | What it does | Example trigger |
 |---|---|---|
@@ -93,12 +106,6 @@ remotepass-design-marketplace/
 | Skill | What it does | Example trigger |
 |---|---|---|
 | `/readiness` | Pre-handoff checklist — breakpoints, use cases, system states, DS compliance, changelog | "Is this design ready for dev?" |
-
-### 🧱 Design System
-| Skill | What it does | Example trigger |
-|---|---|---|
-| `/component-documentation` | Full DS documentation — anatomy, variants, usage, accessibility | "Document the Checkbox component for the design system" |
-| `/component-peer-review` | Peer review DS docs — gaps, clarity, verdict + top 3 fixes | "Review these component docs before I post them to Notion" |
 
 ---
 
