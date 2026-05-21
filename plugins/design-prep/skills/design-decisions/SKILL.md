@@ -1,7 +1,7 @@
 ---
 title: Design Decisions
 description: Look up the RemotePass design team's shared decisions for a topic the designer is asking about, optionally audit a Figma frame or screenshot against the rules in that topic, and log new decisions to the team's Notion database
-version: 3.1.2
+version: 1.0.0
 requires: |
   - Topic from the prompt (required) — what the designer is asking about (icons, spacing, button alignment, confirmation patterns, etc.)
   - Figma frame URL or attached image (optional) — only needed for a visual audit; without one, the skill just returns what the team has decided on that topic
