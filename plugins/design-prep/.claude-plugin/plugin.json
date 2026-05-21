@@ -1,0 +1,8 @@
+{
+  "name": "design-prep",
+  "version": "1.0.0",
+  "description": "Pre-design and during-design skills — the toolkit the team reaches for before review and handoff. Currently houses /design-decisions for looking up the team's shared decisions and logging new ones to Notion. More skills (mock data, pattern lookup, override audit, etc.) may join here over time.",
+  "author": { "name": "Moustapha", "email": "moustapha@remotepass.com" },
+  "repository": "https://github.com/nourdine-ship-it/remotepass-design-marketplace",
+  "keywords": ["design-prep", "pre-design", "planning", "design-decisions", "consistency", "figma", "notion"]
+}
